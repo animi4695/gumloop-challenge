@@ -1,14 +1,14 @@
 import React, { useCallback } from "react";
 import { Handle, Position } from "@xyflow/react";
-import { usePlaylistStore } from "../store";
+import useGumloopStore from "../store";
 import { CustomNodeProps } from "../nodes/types";
 
 const OutputNode: React.FC<CustomNodeProps> = ({ id, data }) => {
 
-  const setOutputFileName = usePlaylistStore((state) => state.updateOutputFileName);
+  const updateOutputNodeFileName = useGumloopStore((state) => state.updateOutputNodeFileName);
 
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setOutputFileName(event.target.value);
+    updateOutputNodeFileName(id, event.target.value);
   };
 
   return (

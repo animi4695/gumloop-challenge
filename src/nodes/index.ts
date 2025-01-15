@@ -123,9 +123,14 @@ export const initialNodes: AppNode[] = [
     position: { x: 800, y: 200 },
     data: {
       label: "Save Output Node",
+      outputFileName: "output.csv",
       execute: (id, outputFileName, value) => {
         console.log(`Node ${id} input changed to:`, value);
         const data = convertToCSV(value);
+        if(data === '') {
+          console.error('No data to save.');
+          return;
+        }
         downloadCSV(data, outputFileName);
       },
     }

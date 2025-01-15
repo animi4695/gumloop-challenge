@@ -55,6 +55,7 @@ export type SpotifyNode = Node<
 export type OutputNode = Node<
   {
     label: string;
+    outputFileName: string;
     execute: (id: string, outputFileName: string, value: any) => void;
   },
   "output-node"
@@ -95,6 +96,7 @@ export type AppState = {
   setEdges: (edges: Edge[]) => void;
   updateNodeData: (nodeId: string, dataUpdater: (data: any) => any) => void;
   updateCustomNode: (nodeId: string, newOutputName: string, newOutputValue: any) => void;
+  updateOutputNodeFileName: (nodeId: string, outputFileName: string) => void;
 };
 
 export const nodeTypes = {

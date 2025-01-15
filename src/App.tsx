@@ -179,9 +179,8 @@ export default function App() {
             // get incomers data and pass to execute function
             const incomers = getIncomers(node, state.nodes, state.edges);
             console.log('Incomers:', incomers);
-            let data = 'output' in incomers[0].data ? incomers[0].data.output[0].value : null;
-            console.log('Data:', data);
-            return await node.data.execute(nodeId, outputFileName, data);
+            const data = 'output' in incomers[0].data ? incomers[0].data.output[0].value : null;
+            return await node.data.execute(nodeId, node.data.outputFileName, data);
           }
           break;
         default:

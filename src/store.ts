@@ -49,7 +49,13 @@ const useGumloopStore = create<AppState>((set, get) => ({
             output.name === newOutputName ? { ...output, value: newOutputValue } : output
         ),
     }));
-},
+  },
+  updateOutputNodeFileName: (nodeId: string, outputFileName: string) => {
+    useGumloopStore.getState().updateNodeData(nodeId, (data) => ({
+        ...data,
+        outputFileName: outputFileName
+    }));
+  }
 }));
  
 export default useGumloopStore;
