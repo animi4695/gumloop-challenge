@@ -1,8 +1,10 @@
 import type { Edge, EdgeTypes } from '@xyflow/react';
 
 export const initialEdges: Edge[] = [
-  { id: 'step1-step2', source: 'step1', target: 'step2', animated: true },
-  { id: 'step2-step3', source: 'step2', target: 'step3', animated: true },
+  { id: 'step1-step3', source: 'custom-1', target: 'custom-3', animated: true },
+  // { id: 'step2-step3', source: 'custom-2', target: 'custom-3', animated: true },
+  // { id: 'step1-step4', source: 'custom-1', target: 'custom-4', animated: true },
+  // { id: 'step1-step5', source: 'custom-1', target: 'custom-5', animated: true },
 ];
 
 export const edgeTypes = {

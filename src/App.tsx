@@ -6,12 +6,16 @@ import {
   useNodesState,
   useEdgesState,
   type OnConnect,
+  useHandleConnections,
+  getIncomers,
+  useNodesData,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
 
-import { initialNodes, nodeTypes } from "./nodes";
-import { initialEdges, edgeTypes } from "./edges";
+// import { nodeTypes } from "./nodes";
+import { AppState, AppNode, nodeTypes } from './nodes/types';
+import { edgeTypes } from "./edges";
 import { RunButton } from "./components/RunButton";
 import { RunReportPanel } from "./components/RunReportPanel";
 import { Logo } from "./components/Logo";
@@ -20,24 +24,52 @@ import { buildTreeLayout } from "./layouts/tree";
 import { buildDiagonalLayout, buildHorizontalLayout, buildVerticalLayout } from "./layouts/horizontal";
 import { ThemesPanel } from "./components/ThemesPanel";
 import { ThemesPanelOpenButton } from "./components/ThemesPanelOpenButton";
-import { useStore, usePlaylistStore } from "./store";
+import useGumloopStore, { useHtmlStore, usePlaylistStore } from "./store";
+import { useShallow } from "zustand/shallow";
+
+ 
+const selector = (state: AppState) => ({
+  nodes: state.nodes,
+  edges: state.edges,
+  onNodesChange: state.onNodesChange,
+  onEdgesChange: state.onEdgesChange,
+  onConnect: state.onConnect,
+});
 
 export default function App() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useGumloopStore(useShallow(selector));
 
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isThemesPanelOpen, setIsThemesPanelOpen] = useState(false);
   // const [playlistid, setPlaylistId] = useState(null);
 
-  const playlistId = usePlaylistStore((state) => state.playlistId);
+  const setSpotifyToken = usePlaylistStore((state) => state.updateSpotifyToken);
 
-  const onConnect: OnConnect = useCallback(
-    (connection) => setEdges((edges) => addEdge(connection, edges)),
-    [setEdges]
-  );
-  // PLgBV6dl98LOFDeCAT_guiQAzVRhPJfLMi
+  const playlistId = usePlaylistStore((state) => state.playlistId);
+  const outputFileName = usePlaylistStore((state) => state.outputFileName);
+  const htmlContent = useHtmlStore((state) => state.htmlContent);
+
+  // TODO change this to a env variable
+  const fetchPlayListURL = 'http://localhost:3000/api/fetch-html?playlistid=';
+
+  const updateCustomNode = useGumloopStore((state) => state.updateCustomNode);
+
+  // const nodeData = useNodesData('custom-1');
+  // // PLgBV6dl98LOFDeCAT_guiQAzVRhPJfLMi
   
+  // useEffect(() => {
+  //   const hash = window.location.hash; // Get the URL fragment (e.g., #access_token=...)
+  //   if (hash) {
+  //     const params = new URLSearchParams(hash.substring(1)); // Remove the "#" and parse
+  //     const token = params.get("access_token");
+  //     if (token) {
+  //       setSpotifyToken(token);
+  //       console.log("Spotify Access Token:", token);
+  //       // Optionally clear the URL hash
+  //       window.location.hash = "";
+  //     }
+  //   }
+  // }, []);
 
   const updateNodesLayout = (id: number) => {
     console.log('Initial Nodes:', nodes);
@@ -54,46 +86,149 @@ export default function App() {
       updatedNodes = buildDiagonalLayout(nodes, 100, 80);
     }
 
-    setNodes(updatedNodes);
+    // setNodes(updatedNodes);
     
     return updatedNodes;
   };
 
-  const fetchAndProcessHtml = async () => {
-    try {
-      const response = await fetch(
-        'http://localhost:3000/api/fetch-html?playlistid=' + playlistId
-      );
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const html = await response.text(); // Retrieve HTML content as text
-      getTrackDetails(html); // Process the HTML content
-    } catch (error) {
-      console.error('Failed to fetch HTML:', error);
-    }
-  }
+  // const updateNode = (nodeId: string, updater: (node: AppNode) => AppNode): void => {
+  //   setNodes((nds) =>
+  //     nds.map((node) =>
+  //       node.id === nodeId ? updater(node) : node
+  //     ) as AppNode[]
+  //   );
+  // };
+
   
-  const getTrackDetails = (html: string) => {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, "text/html");
+  // const updateNodeData = (nodeId: string, key: string, value: any) => {
+  //   setNodes((nds) =>
+  //     nds.map((node) =>
+  //       node.id === nodeId
+  //         ? {
+  //           ...node,
+  //           data: {
+  //             ...node.data,
+  //             [key]: value,
+  //           },
+  //         }
+  //         : node
+  //     ) as AppNode[]
+  //   );
+  // };
 
-    const items = doc.querySelectorAll("ytmusic-responsive-list-item-renderer");
-    const details = Array.from(items).map((item) => {
-      const formattedStrings = item.querySelectorAll(
-        "yt-formatted-string[title]"
-      );
-      return {
-        title: formattedStrings[0]?.getAttribute("title") || null, // Main title
-        artist: formattedStrings[1]?.getAttribute("title") || null, // Artist
-        album: formattedStrings[2]?.getAttribute("title") || null, // Album
-        time: formattedStrings[3]?.getAttribute("title") || null, // Time
-      };
-    });
+  // const updateNodeOutput = (nodeId: string, outputName: string, newValue: any) => {
+  //   setNodes((nds) =>
+  //     nds.map((node) =>
+  //       node.id === nodeId && 'output' in node.data
+  //         ? {
+  //             ...node,
+  //             data: {
+  //               ...node.data,
+  //               output: (node.data.output as { name: string; value: any }[]).map((output) =>
+  //                 output.name === outputName
+  //                   ? { ...output, value: newValue } // Return updated output object
+  //                   : output // Return the original output object if no match
+  //               ),
+  //             },
+  //           }
+  //         : node
+  //     ) as AppNode[]
+  //   );
+  // };
+  
+  // useEffect(() => {
+  //   console.log('Nodes:', nodes);
+  // });
 
-    console.log("Extracted Details:", details);
-    return details;
+  const runFlow = async () => {
+    console.log('Running flow...');
+
+    const nodeMap = new Map(nodes.map((node: AppNode) => [node.id, node]));
+
+    const executeNode = async (nodeId: string) => {
+
+      const state = useGumloopStore.getState();
+
+      const node = nodeMap.get(nodeId);
+      if (!node) {
+        throw new Error(`Node with ID ${nodeId} not found`);
+      }
+  
+      console.log(`Executing Node ${nodeId}`);
+
+      switch (node.type) {
+        case 'youtube-node':
+          if('execute' in node.data) {
+            const incomers = getIncomers(node, state.nodes, state.edges);
+            console.log('Incomers:', incomers);
+            let data = 'output' in incomers[0].data ? incomers[0].data.output[0].value : null;
+
+            const tracks = await node.data.execute(nodes[0].id, data);
+            console.log('Tracks:', tracks);
+            state.updateCustomNode(nodes[1].id, 'tracks', tracks);
+            
+            const updatedNode = useGumloopStore.getState().nodes.find((n) => n.id === state.nodes[1].id);
+            console.log('youtube-node Updated Node:', updatedNode);
+
+            return tracks;
+          }
+          // result = await node.data.execute(nodeId, fetchPlayListURL + playlistId);
+          break;
+        case 'output-node':
+          if('execute' in node.data) {
+            // get incomers data and pass to execute function
+            const incomers = getIncomers(node, state.nodes, state.edges);
+            console.log('Incomers:', incomers);
+            let data = 'output' in incomers[0].data ? incomers[0].data.output[0].value : null;
+            console.log('Data:', data);
+            return await node.data.execute(nodeId, outputFileName, data);
+          }
+          break;
+        default:
+          break;
+      }
+      return null;
+    };
+
+    // In our flow, we have only 2 types of root nodes: custom-input-node and spotify-input-node
+    const inputNodes = nodes.filter((node: any) => node.type === 'custom-input-node' || node.type === 'spotify-input-node');
+    console.log('root nodes:', inputNodes);
+
+    const visited = new Set();
+    let currentLevelNodes = inputNodes; 
+
+    while (currentLevelNodes.length > 0) {
+      const nextLevelNodes = [];
+  
+      for (const node of currentLevelNodes) {
+        if (visited.has(node.id)) continue;
+  
+        visited.add(node.id);
+  
+        // Execute the current node
+        const result = await executeNode(node.id);
+        console.log('execute result:', result);
+  
+        // Find downstream nodes (nodes connected via outgoing edges)
+        const downstreamEdges = edges.filter((edge) => edge.source === node.id);
+  
+        for (const edge of downstreamEdges) {
+          const downstreamNode = nodeMap.get(edge.target);
+          if (downstreamNode && !visited.has(downstreamNode.id)) {
+            // Pass the result of this node to the downstream node
+            // downstreamNode.data.input = result;
+            nextLevelNodes.push(downstreamNode);
+          }
+        }
+      }
+  
+      // Move to the next level
+      currentLevelNodes = nextLevelNodes;
+    }
+
+    console.log('Flow completed.');
   };
+
 
   return (
     <ReactFlow
@@ -111,13 +246,12 @@ export default function App() {
       
       <RunButton onRun={() => {
         setIsPanelOpen(true);
-        fetchAndProcessHtml();
+        runFlow();
       }} />
       <RunReportPanel
         isOpen={isPanelOpen}
         onClose={() => setIsPanelOpen(false)}
       />
-
       <ThemesPanelOpenButton isOpen = {isThemesPanelOpen} onOpen={() => setIsThemesPanelOpen(!isThemesPanelOpen)} />
       <ThemesPanel isOpen={isThemesPanelOpen} onClose={() => setIsThemesPanelOpen(false)} onThemeClick={updateNodesLayout} />
     </ReactFlow>

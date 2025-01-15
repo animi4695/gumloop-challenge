@@ -1,24 +1,16 @@
 import React, { useCallback } from "react";
 import { Handle, Position } from "@xyflow/react";
-
-type CustomNodeProps = {
-  id: string;
-  data: {
-    label: string;
-    onInputChange?: (id: string, value: string) => void;
-    onFileUpload?: (id: string, file: File | null) => void;
-  };
-};
+import { CustomNodeProps } from "../nodes/types";
+import { usePlaylistStore } from "../store";
 
 const SpotifyNode: React.FC<CustomNodeProps> = ({ id, data }) => {
-  const handleInputChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (data.onInputChange) {
-        data.onInputChange(id, event.target.value);
-      }
-    },
-    [data, id]
-  );
+  const spotifyToken = usePlaylistStore((state) => state.spotifyToken);
+
+  const setPlaylistName = usePlaylistStore((state) => state.updateSpotifyPlaylistName);
+
+  const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setPlaylistName(event.target.value);
+  };
 
   return (
     <div
@@ -32,21 +24,25 @@ const SpotifyNode: React.FC<CustomNodeProps> = ({ id, data }) => {
       }}
     >
       <div>{data.label}</div>
-      <hr></hr>
+      <hr></hr><br></br>
+      <span>Spotify Token: </span>
       <input
         type="text"
         placeholder="Enter Bearer Token"
-        onChange={handleInputChange}
+        value={spotifyToken}
+        readOnly
         style={{ width: "100%", margin: "10px 0", padding: "5px" }}
       />
+      <br></br>
+      <span>Playlist Name:</span>
       <input
         type="text"
         placeholder="Enter Playlist Name"
-        onChange={handleInputChange}
+        onChange={onInputChange}
         style={{ width: "100%", margin: "10px 0", padding: "5px" }}
       />
       <Handle type="source" position={Position.Bottom} />
-      <Handle type="target" position={Position.Top} />
+      {/* <Handle type="target" position={Position.Top} /> */}
     </div>
   );
 };

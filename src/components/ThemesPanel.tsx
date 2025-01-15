@@ -6,7 +6,21 @@ interface ThemesPanelProps {
   onThemeClick: (id: number) => void;
 }
 
+
 export function ThemesPanel({ isOpen = true, onClose, onThemeClick }: ThemesPanelProps) {
+
+  const getToken = () => {
+    const clientId = 'd0429ee040f54ec7b068dcf55211712c';
+    const redirectUri = 'http://localhost:5173/callback';
+    const scopes = [
+      'playlist-read-private',
+      'playlist-read-collaborative',
+    ];
+
+    const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes.join(' '))}`;
+    window.location.href = authUrl;
+  }
+
   return (
     <div
       className={`fixed top-20 left-4 h-[90vh] w-96 bg-white border border-gray-200 rounded-lg transform transition-transform duration-300 ease-in-out ${isOpen ? "translate-x-0" : "-translate-x-full"
@@ -34,6 +48,14 @@ export function ThemesPanel({ isOpen = true, onClose, onThemeClick }: ThemesPane
           </div>
         ))}
       </div>
+      <div className="flex justify-center p-4 border-t">
+          <button
+            onClick={getToken}
+            className="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
+          >
+            Login With Spotify
+          </button>
+        </div>
       </div>
     </div>
   );
