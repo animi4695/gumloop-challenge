@@ -41,7 +41,6 @@ export default function App() {
 
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isThemesPanelOpen, setIsThemesPanelOpen] = useState(false);
-  // const [playlistid, setPlaylistId] = useState(null);
 
   const setSpotifyToken = usePlaylistStore((state) => state.updateSpotifyToken);
 
@@ -52,24 +51,26 @@ export default function App() {
   // TODO change this to a env variable
   const fetchPlayListURL = 'http://localhost:3000/api/fetch-html?playlistid=';
 
-  const updateCustomNode = useGumloopStore((state) => state.updateCustomNode);
+  const updateSpotifyToken = useGumloopStore((state) => state.updateSpotifyToken);
+
 
   // const nodeData = useNodesData('custom-1');
   // // PLgBV6dl98LOFDeCAT_guiQAzVRhPJfLMi
   
-  // useEffect(() => {
-  //   const hash = window.location.hash; // Get the URL fragment (e.g., #access_token=...)
-  //   if (hash) {
-  //     const params = new URLSearchParams(hash.substring(1)); // Remove the "#" and parse
-  //     const token = params.get("access_token");
-  //     if (token) {
-  //       setSpotifyToken(token);
-  //       console.log("Spotify Access Token:", token);
-  //       // Optionally clear the URL hash
-  //       window.location.hash = "";
-  //     }
-  //   }
-  // }, []);
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      // Remove the "#" and parse
+      const params = new URLSearchParams(hash.substring(1)); 
+      const token = params.get("access_token");
+      if (token) {
+        updateSpotifyToken('custom-3', token);
+        setSpotifyToken(token);
+        console.log("Spotify Access Token:", token);
+        window.location.hash = "";
+      }
+    }
+  }, []);
 
   const updateNodesLayout = (id: number) => {
     console.log('Initial Nodes:', nodes);
@@ -172,7 +173,6 @@ export default function App() {
 
             return tracks;
           }
-          // result = await node.data.execute(nodeId, fetchPlayListURL + playlistId);
           break;
         case 'output-node':
           if('execute' in node.data) {

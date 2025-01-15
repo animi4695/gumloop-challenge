@@ -2,6 +2,13 @@
 
 import { AppNode } from "./types";
 
+const getSpotifyTracks = async (bearerToken: string, tracks: any) => {
+  try {
+    return [];
+  } catch (error) {
+    console.error('Failed to fetch Spotify playlist:', error);
+  }
+}
 
 const fetchAndProcessHtml = async (fetchPlayListURL: string) => {
   try {
@@ -106,19 +113,19 @@ export const initialNodes: AppNode[] = [
       }
     }
   },
-  // {
-  //   id: "custom-2",
-  //   type: "spotify-input-node",
-  //   position: { x: 600, y: 100 },
-  //   data: {
-  //     label: "Spotify Access Node",
-  //     onInputChange: (id, value) => {
-  //       console.log(`Node ${id} input changed to:`, value);
-  //     },
-  //   }
-  // },
   {
     id: "custom-3",
+    type: "spotify-input-node",
+    position: { x: 600, y: 100 },
+    data: {
+      label: "Spotify Access Node",
+      description: "Get playlist details from youtube",
+      bearerToken: "",
+      playlistName: "",
+    }
+  },
+  {
+    id: "custom-4",
     type: "output-node",
     position: { x: 800, y: 200 },
     data: {
@@ -135,17 +142,28 @@ export const initialNodes: AppNode[] = [
       },
     }
   },
-  // {
-  //   id: "custom-4",
-  //   type: "spotify-search-track-node",
-  //   position: { x: 1000, y: 200 },
-  //   data: {
-  //     label: "Spotify Search Track Node",
-  //     onInputChange: (id, value) => {
-  //       console.log(`Node ${id} input changed to:`, value);
-  //     },
-  //   }
-  // },
+  {
+    id: "custom-5",
+    type: "spotify-search-track-node",
+    position: { x: 1000, y: 200 },
+    data: {
+      label: "Spotify Search Track Node",
+      description: "Search for tracks on Spotify",
+      output: [
+        {
+          name: "tracks",
+          value: [],
+        }
+      ],
+      execute: async (id : string, bearerToken : string, tracks : any) => {
+        return await getSpotifyTracks(bearerToken, tracks).then((data) => {
+          console.log('Data:', data);
+          // found tracks list
+          return data;
+        });
+      }
+    }
+  },
   // {
   //   id: "custom-5",
   //   type: "spotify-create-track-node",

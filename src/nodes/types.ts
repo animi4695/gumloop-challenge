@@ -1,11 +1,13 @@
 import type { Node, Edge, OnNodesChange, OnEdgesChange, OnConnect, BuiltInNode } from "@xyflow/react";
 import PlayListInputNode from "../components/PlayListInputNode";
-import SpotifyNode from "../components/SpotifyNode";
 import OutputNode from "../components/OutputNode";
 import SpotifySearchTrackNode from "../components/SpotifySearchNode";
 import SpotifyCreateTrackNode from "../components/SpotifyCreateTrackNode";
 import type { NodeTypes } from "@xyflow/react";
 import YoutubeNodeComponent from "../components/YoutubeNode";
+import SpotifyInputNode from "../components/SpotifyInputNode";
+import SpotifyInputNodeComponent from "../components/SpotifyInputNode";
+import SpotifySearchTrackNodeComponent from "../components/SpotifySearchNode";
 export type FunctionNode = Node<
   {
     label: string;
@@ -44,10 +46,12 @@ export type YoutubeNode = Node<
   "youtube-node"
 >;
 
-export type SpotifyNode = Node<
+export type SpotifyInputNode = Node<
   {
     label: string;
-    onInputChange?: (id: string, value: string) => void;
+    description: string;
+    bearerToken: string;
+    playlistName: string;
   },
   "spotify-input-node"
 >;
@@ -64,7 +68,14 @@ export type OutputNode = Node<
 export type SpotifySearchTrackNode = Node<
   {
     label: string;
-    onInputChange?: (id: string, value: string) => void;
+    description: string;
+    output: [
+      {
+        name: string;
+        value: any;
+      }
+    ],
+    execute: (id: string, outputFileName: string, value: any) => void;
   },
   "spotify-search-track-node"
 >;
@@ -84,7 +95,7 @@ export type CustomNodeProps = {
   };
 };
 
-export type AppNode =  BuiltInNode | FunctionNode | CustomNode | YoutubeNode | SpotifyNode | SpotifySearchTrackNode | SpotifyCreateTrackNode | OutputNode;
+export type AppNode =  BuiltInNode | FunctionNode | CustomNode | YoutubeNode | SpotifyInputNode | SpotifySearchTrackNode | SpotifyCreateTrackNode | OutputNode;
 
 export type AppState = {
   nodes: AppNode[];
@@ -97,14 +108,16 @@ export type AppState = {
   updateNodeData: (nodeId: string, dataUpdater: (data: any) => any) => void;
   updateCustomNode: (nodeId: string, newOutputName: string, newOutputValue: any) => void;
   updateOutputNodeFileName: (nodeId: string, outputFileName: string) => void;
+  updateSpotifyToken: (nodeId: string, spotifyToken: string) => void;
+  updateSpotifyPlaylistName: (nodeId: string, spotifyPlaylistName: string) => void;
 };
 
 export const nodeTypes = {
   // Add any of your custom nodes here!,
   "custom-input-node": PlayListInputNode,
   "youtube-node": YoutubeNodeComponent,
-  "spotify-input-node": SpotifyNode,
+  "spotify-input-node": SpotifyInputNodeComponent,
   "output-node": OutputNode,
-  "spotify-search-track-node": SpotifySearchTrackNode,
+  "spotify-search-track-node": SpotifySearchTrackNodeComponent,
   "spotify-create-track-node": SpotifyCreateTrackNode,
 } satisfies NodeTypes;

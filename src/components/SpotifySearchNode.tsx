@@ -1,58 +1,101 @@
 import React, { useCallback } from "react";
-import { Handle, Position } from "@xyflow/react";
+import { Handle, NodeProps, Position } from "@xyflow/react";
+import { SpotifySearchTrackNode } from "../nodes/types";
 
-type CustomNodeProps = {
-  id: string;
-  data: {
-    label: string;
-    onInputChange?: (id: string, value: string) => void;
-    onFileUpload?: (id: string, file: File | null) => void;
-  };
-};
+const SpotifySearchTrackNodeComponent: React.FC<NodeProps<SpotifySearchTrackNode>> = ({ id, data }) => {
 
-const SpotifySearchTrackNode: React.FC<CustomNodeProps> = ({ id, data }) => {
-  const handleInputChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (data.onInputChange) {
-        data.onInputChange(id, event.target.value);
-      }
-    },
-    [data, id]
-  );
-
-  const DEFAULT_HANDLE_STYLE = {
-    width: 10,
-    height: 10,
-    bottom: -5,
-  };
+  // Searches for list of tracks in spotify using track details and bearer token.
 
   return (
     <div
       style={{
-        padding: "10px",
-        border: "1px solid #ddd",
-        borderRadius: "4px",
-        backgroundColor: "#f9f9f9",
-        width: "250px",
-        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2), 0px 2px 4px rgba(0, 0, 0, 0.1)"
+        padding: "20px",
+        border: "1px solid #e0e0e0",
+        borderRadius: "8px",
+        backgroundColor: "#ffffff",
+        width: "320px",
+        boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.15)",
+        fontFamily: "Arial, sans-serif",
+        color: "#333",
       }}
     >
-      <div>{data.label}</div>
-      <hr></hr>
-      <span>This note is a custom node that takes spotify bearer token, track details (track name, artist name, album name) and outputs found(Y/N), Spotify Track Id</span>
-      <p>
-        input : spotify bearer token, track details (track name, artist name, album name)
-        output : found(Y/N), Spotify Track Id
-      </p>
+      {/* Card Header */}
+      <div style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "10px" }}>
+        {data.label}
+      </div>
 
-      <Handle  type="target" position={Position.Top} />
-      <Handle style={{ left: '25%'}} id='a' type="source" position={Position.Bottom} />
-      <Handle style={{ left: '75%'}} id='b' type="source" position={Position.Bottom} />
+      <hr style={{ border: "none", borderTop: "1px solid #ddd", margin: "10px 0" }} />
+
+      {/* Description */}
+      <div style={{ fontSize: "14px", lineHeight: "1.6", marginBottom: "10px" }}>
+        {data.description}
+      </div>
+
+      {/* Input/Output Details */}
+      <div
+        style={{
+          fontSize: "12px",
+          backgroundColor: "#f3f4f6",
+          padding: "10px",
+          borderRadius: "4px",
+          border: "1px solid #ddd",
+          marginBottom: "15px",
+        }}
+      >
+        <strong>Function Node:</strong> Input: <em>list of tracks</em>, Output: <em>Found Spotify Tracks</em>
+      </div>
+
+      {/* Handles */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <Handle
+          type="target"
+          id = "bearerTokenInput"
+          position={Position.Top}
+          style={{
+            width: "10px",
+            height: "10px",
+            left: "25%",
+            backgroundColor: "#6c757d",
+            borderRadius: "50%",
+            cursor: "pointer",
+          }}
+        />
+        <Handle
+          type="target"
+          id = "tracksInput"
+          position={Position.Top}
+          style={{
+            width: "10px",
+            height: "10px",
+            left: "75%",
+            backgroundColor: "#6c757d",
+            borderRadius: "50%",
+            cursor: "pointer",
+          }}
+        />
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          style={{
+            width: "10px",
+            height: "10px",
+            backgroundColor: "#6c757d",
+            borderRadius: "50%",
+            cursor: "pointer",
+          }}
+        />
+      </div>
     </div>
   );
 };
 
-export default SpotifySearchTrackNode;
+export default SpotifySearchTrackNodeComponent;
 
 // input : spotify bearer token, track details (track name, artist name, album name)
 // output : found(Y/N), Spotify Track Id, 

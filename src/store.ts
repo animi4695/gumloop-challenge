@@ -55,6 +55,18 @@ const useGumloopStore = create<AppState>((set, get) => ({
         ...data,
         outputFileName: outputFileName
     }));
+  },
+  updateSpotifyToken: (nodeId: string, spotifyToken: string) => {
+    useGumloopStore.getState().updateNodeData(nodeId, (data) => ({
+        ...data,
+        bearerToken: spotifyToken
+    }));
+  },
+  updateSpotifyPlaylistName: (nodeId: string, spotifyPlaylistName: string) => {
+    useGumloopStore.getState().updateNodeData(nodeId, (data) => ({
+        ...data,
+        playlistName: spotifyPlaylistName
+    }));
   }
 }));
  
