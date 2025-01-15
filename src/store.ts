@@ -10,6 +10,10 @@ import { AppNode, AppState } from './nodes/types';
 const useGumloopStore = create<AppState>((set, get) => ({
   nodes: initialNodes,
   edges: initialEdges,
+  clientId: "d0429ee040f54ec7b068dcf55211712c",
+  redirectUri:"http://localhost:5173/callback",
+  tokenType: "Bearer",
+  expiresIn: 3600,
   onNodesChange: (changes) => {
     set({
       nodes: applyNodeChanges(changes, get().nodes),
@@ -30,6 +34,14 @@ const useGumloopStore = create<AppState>((set, get) => ({
   },
   setEdges: (edges) => {
     set({ edges });
+  },
+  updateSpotifyTokenMetadata: (spotifyToken: string, tokenType: string, expiresIn: number) => {
+    set((state) => ({
+      ...state,
+      spotifyToken: spotifyToken,
+      tokenType: tokenType,
+      expiresIn: expiresIn
+    }));
   },
   updateNodeData: (nodeId: string, dataUpdater: (data: any) => any) => {
     set((state) => ({
@@ -67,7 +79,14 @@ const useGumloopStore = create<AppState>((set, get) => ({
         ...data,
         playlistName: spotifyPlaylistName
     }));
-  }
+  },
+  getSpotifyToken: (nodeId: string) => {
+    const node = useGumloopStore.getState().nodes.find(node => node.id === nodeId);
+    if (node && 'bearerToken' in node.data) {
+        return node.data.bearerToken;
+    }
+    return undefined;
+  },
 }));
  
 export default useGumloopStore;

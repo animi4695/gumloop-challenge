@@ -26,6 +26,8 @@ import { ThemesPanel } from "./components/ThemesPanel";
 import { ThemesPanelOpenButton } from "./components/ThemesPanelOpenButton";
 import useGumloopStore, { useHtmlStore, usePlaylistStore } from "./store";
 import { useShallow } from "zustand/shallow";
+import { AccessToken, SpotifyApi } from "@spotify/web-api-ts-sdk";
+import SpotifySdkSingleton from "./spotify";
 
  
 const selector = (state: AppState) => ({
@@ -35,6 +37,7 @@ const selector = (state: AppState) => ({
   onEdgesChange: state.onEdgesChange,
   onConnect: state.onConnect,
 });
+
 
 export default function App() {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useGumloopStore(useShallow(selector));
@@ -51,7 +54,12 @@ export default function App() {
   // TODO change this to a env variable
   const fetchPlayListURL = 'http://localhost:3000/api/fetch-html?playlistid=';
 
+  const spotifyTokenType = useGumloopStore((state) => state.tokenType);
+  const spotifyTokenExpiresIn = useGumloopStore((state) => state.expiresIn);
+  const spotifyClientId = useGumloopStore((state) => state.clientId);
+
   const updateSpotifyToken = useGumloopStore((state) => state.updateSpotifyToken);
+  const updateSpotifyTokenMetadata = useGumloopStore((state) => state.updateSpotifyTokenMetadata);
 
 
   // const nodeData = useNodesData('custom-1');
@@ -63,11 +71,25 @@ export default function App() {
       // Remove the "#" and parse
       const params = new URLSearchParams(hash.substring(1)); 
       const token = params.get("access_token");
+      const tokenType = params.get("token_type") || "Bearer";
+      const expiresIn = params.get("expires_in") || "3600";
+      
       if (token) {
         updateSpotifyToken('custom-3', token);
-        setSpotifyToken(token);
+        updateSpotifyTokenMetadata(token, tokenType, parseInt(expiresIn));
+
+        if (token && tokenType && expiresIn) {
+          const sdk = SpotifySdkSingleton.getInstance('', {
+            access_token: token, token_type: tokenType, expires_in: parseInt(expiresIn),
+            refresh_token: ""
+          });
+
+          sdk.currentUser.profile().then((profile) => {
+            console.log("Profile:", profile);
+          });
+        }
         console.log("Spotify Access Token:", token);
-        window.location.hash = "";
+        // window.location.hash = "";
       }
     }
   }, []);
@@ -143,6 +165,7 @@ export default function App() {
 
   const runFlow = async () => {
     console.log('Running flow...');
+    console.log('nodes:', nodes);
 
     const nodeMap = new Map(nodes.map((node: AppNode) => [node.id, node]));
 
@@ -164,11 +187,11 @@ export default function App() {
             console.log('Incomers:', incomers);
             let data = 'output' in incomers[0].data ? incomers[0].data.output[0].value : null;
 
-            const tracks = await node.data.execute(nodes[0].id, data);
+            const tracks = await node.data.execute(node.id, data);
             console.log('Tracks:', tracks);
-            state.updateCustomNode(nodes[1].id, 'tracks', tracks);
+            state.updateCustomNode(node.id, 'tracks', tracks);
             
-            const updatedNode = useGumloopStore.getState().nodes.find((n) => n.id === state.nodes[1].id);
+            const updatedNode = useGumloopStore.getState().nodes.find((n) => n.id === node.id);
             console.log('youtube-node Updated Node:', updatedNode);
 
             return tracks;
@@ -181,6 +204,45 @@ export default function App() {
             console.log('Incomers:', incomers);
             const data = 'output' in incomers[0].data ? incomers[0].data.output[0].value : null;
             return await node.data.execute(nodeId, node.data.outputFileName, data);
+          }
+          break;
+        case 'spotify-search-track-node':
+          if('execute' in node.data) {
+            const incomers = getIncomers(node, state.nodes, state.edges);
+            console.log('Incomers:', incomers);
+            // get bearerToken from spotify-input-node
+            // get incommer of type spotify-input-node
+            const spotifyIncommer = incomers.find((incomer) => incomer.type === 'spotify-input-node');
+
+            if (!spotifyIncommer) {
+              throw new Error('No spotify-input-node found');
+            }
+            const bearerToken = 'bearerToken' in spotifyIncommer.data ? spotifyIncommer.data.bearerToken : "";
+
+            // get incommer of type youtube-node
+            const youtubeIncommer = incomers.find((incomer) => incomer.type === 'youtube-node');
+            if (!youtubeIncommer) {
+              throw new Error('No youtube-node found');
+            }
+
+            let youtubeTracks = 'output' in youtubeIncommer.data ? youtubeIncommer.data.output[0].value : null;
+
+            const sdk = SpotifySdkSingleton.getInstance('', {
+              access_token: bearerToken, token_type: spotifyTokenType, expires_in: spotifyTokenExpiresIn,refresh_token: ""
+            });
+
+            if(!sdk) {
+              throw new Error('Spotify SDK not initialized');
+            }
+            
+            const tracks = await node.data.execute(node.id, sdk, youtubeTracks);
+            console.log('Tracks:', tracks);
+            state.updateCustomNode(node.id, 'tracks', tracks);
+            
+            const updatedNode = useGumloopStore.getState().nodes.find((n) => n.id === node.id);
+            console.log('spotify-search-track-node Updated Node:', updatedNode);
+
+            return tracks;
           }
           break;
         default:

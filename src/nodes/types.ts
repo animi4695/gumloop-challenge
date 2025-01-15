@@ -8,6 +8,7 @@ import YoutubeNodeComponent from "../components/YoutubeNode";
 import SpotifyInputNode from "../components/SpotifyInputNode";
 import SpotifyInputNodeComponent from "../components/SpotifyInputNode";
 import SpotifySearchTrackNodeComponent from "../components/SpotifySearchNode";
+import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 export type FunctionNode = Node<
   {
     label: string;
@@ -75,7 +76,7 @@ export type SpotifySearchTrackNode = Node<
         value: any;
       }
     ],
-    execute: (id: string, outputFileName: string, value: any) => void;
+    execute: (id: string, sdk: SpotifyApi, tracks: any) => void;
   },
   "spotify-search-track-node"
 >;
@@ -100,6 +101,10 @@ export type AppNode =  BuiltInNode | FunctionNode | CustomNode | YoutubeNode | S
 export type AppState = {
   nodes: AppNode[];
   edges: Edge[];
+  clientId: string,
+  redirectUri: string,
+  tokenType: string,
+  expiresIn: number,
   onNodesChange: OnNodesChange<AppNode>;
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
@@ -110,6 +115,7 @@ export type AppState = {
   updateOutputNodeFileName: (nodeId: string, outputFileName: string) => void;
   updateSpotifyToken: (nodeId: string, spotifyToken: string) => void;
   updateSpotifyPlaylistName: (nodeId: string, spotifyPlaylistName: string) => void;
+  updateSpotifyTokenMetadata: (spotifyToken: string, tokenType: string, expiresIn: number) => void;
 };
 
 export const nodeTypes = {

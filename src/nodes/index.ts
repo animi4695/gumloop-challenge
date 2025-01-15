@@ -1,14 +1,49 @@
 
 
+import { SpotifyApi, Market } from "@spotify/web-api-ts-sdk";
 import { AppNode } from "./types";
 
-const getSpotifyTracks = async (bearerToken: string, tracks: any) => {
+const getSpotifyTracks = async (spotifySdk: SpotifyApi, tracks: any) => {
   try {
-    return [];
+    const result = [];
+    
+    for (const track of tracks) {
+      const { title, artist, album, time } = track;
+
+      const query = `track:${title} artist:${artist} album:${album}`;
+      
+      const response = await spotifySdk.search(query, ['track'], 'US', 1);
+
+      if (response?.tracks?.items?.length > 0) {
+        // Get the first matching track from the results
+        const spotifyTrack = response.tracks.items[0];
+
+        // Log the matched Spotify track
+        console.log('Spotify Track:', spotifyTrack);
+
+        // Add the track details to the result
+        result.push({
+          title: track.title,
+          artist: track.artist,
+          album: track.album,
+          time: track.time,
+          spotifyTrackId: spotifyTrack.id,
+          spotifyTrackName: spotifyTrack.name,
+          spotifyArtist: spotifyTrack.artists.map((a: any) => a.name).join(', '),
+          spotifyAlbum: spotifyTrack.album.name,
+        });
+      } else {
+        console.warn(`No match found for track: ${title} by ${artist}`);
+      }
+    }
+
+    return result;
   } catch (error) {
     console.error('Failed to fetch Spotify playlist:', error);
+    throw error; // Optionally rethrow the error
   }
-}
+};
+
 
 const fetchAndProcessHtml = async (fetchPlayListURL: string) => {
   try {
@@ -79,14 +114,14 @@ export const initialNodes: AppNode[] = [
   {
     id: "custom-1",
     type: "custom-input-node",
-    position: { x: 400, y: 100 },
+    position: { x: 1224, y: -228.75 },
     data: {
       label: "Text Node",
       description: "Takes an input - playlist id.",
       output: [
         {
           name: "playlistId",
-          value: "fsdfsf",
+          value: "PLgBV6dl98LOFDeCAT_guiQAzVRhPJfLMi",
         }
       ]
     }
@@ -94,7 +129,7 @@ export const initialNodes: AppNode[] = [
   {
     id: "custom-2",
     type: "youtube-node",
-    position: { x: 400, y: 100 },
+    position: { x: 1226, y: 130 },
     data: {
       label: "Youtube Node",
       description: "Get playlist details from youtube",
@@ -116,7 +151,7 @@ export const initialNodes: AppNode[] = [
   {
     id: "custom-3",
     type: "spotify-input-node",
-    position: { x: 600, y: 100 },
+    position: { x: 830, y: 248 },
     data: {
       label: "Spotify Access Node",
       description: "Get playlist details from youtube",
@@ -127,7 +162,7 @@ export const initialNodes: AppNode[] = [
   {
     id: "custom-4",
     type: "output-node",
-    position: { x: 800, y: 200 },
+    position: { x: 1174, y: 925 },
     data: {
       label: "Save Output Node",
       outputFileName: "output.csv",
@@ -145,7 +180,7 @@ export const initialNodes: AppNode[] = [
   {
     id: "custom-5",
     type: "spotify-search-track-node",
-    position: { x: 1000, y: 200 },
+    position: { x: 1172, y: 592 },
     data: {
       label: "Spotify Search Track Node",
       description: "Search for tracks on Spotify",
@@ -155,8 +190,8 @@ export const initialNodes: AppNode[] = [
           value: [],
         }
       ],
-      execute: async (id : string, bearerToken : string, tracks : any) => {
-        return await getSpotifyTracks(bearerToken, tracks).then((data) => {
+      execute: async (id : string, spotifySdk : any, tracks : any) => {
+        return await getSpotifyTracks(spotifySdk, tracks).then((data) => {
           console.log('Data:', data);
           // found tracks list
           return data;
