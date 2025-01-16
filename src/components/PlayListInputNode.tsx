@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
-import useGumloopStore, { usePlaylistStore, useHtmlStore } from "../store";
-import { CustomNode, CustomNodeProps } from "../nodes/types";
+import useGumloopStore, { useHtmlStore } from "../store";
+import { CustomNode } from "../nodes/types";
 
 const PlayListInputNode: React.FC<NodeProps<CustomNode>> = ({ id, data }) => {
 
@@ -48,19 +48,14 @@ const PlayListInputNode: React.FC<NodeProps<CustomNode>> = ({ id, data }) => {
         color: "#333",
       }}
     >
-      {/* Label Header */}
       <div style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "10px" }}>
         {data.label}
       </div>
 
       <hr style={{ border: "none", borderTop: "1px solid #ddd", margin: "10px 0" }} />
-
-      {/* Description */}
       <div style={{ fontSize: "14px", lineHeight: "1.6", marginBottom: "15px" }}>
         {data.description}
       </div>
-
-      {/* Input Type Selection */}
       <div style={{ marginBottom: "10px" }}>
         <span style={{ fontSize: "14px", fontWeight: "bold", display: "block", marginBottom: "5px" }}>
           Select Input Type:
@@ -84,8 +79,6 @@ const PlayListInputNode: React.FC<NodeProps<CustomNode>> = ({ id, data }) => {
           <option value="file">File</option>
         </select>
       </div>
-
-      {/* Playlist ID Input */}
       {inputType === "playlistid" && (
         <input
           type="text"
@@ -102,8 +95,6 @@ const PlayListInputNode: React.FC<NodeProps<CustomNode>> = ({ id, data }) => {
           }}
         />
       )}
-
-      {/* File Upload Input */}
       {inputType === "file" && (
         <input
           type="file"
@@ -120,8 +111,6 @@ const PlayListInputNode: React.FC<NodeProps<CustomNode>> = ({ id, data }) => {
           }}
         />
       )}
-
-      {/* Handle Source */}
       <div
         style={{
           display: "flex",

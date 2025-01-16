@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { Handle, Position } from "@xyflow/react";
 import useGumloopStore from "../store";
 import { CustomNodeProps } from "../nodes/types";
@@ -24,14 +24,11 @@ const OutputNode: React.FC<CustomNodeProps> = ({ id, data }) => {
         color: "#333",
       }}
     >
-      {/* Label Header */}
       <div style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "10px" }}>
         {data.label}
       </div>
 
       <hr style={{ border: "none", borderTop: "1px solid #ddd", margin: "10px 0" }} />
-
-      {/* Input Field */}
       <input
         type="text"
         placeholder="Enter Output Name"
@@ -45,8 +42,6 @@ const OutputNode: React.FC<CustomNodeProps> = ({ id, data }) => {
           marginBottom: "10px",
         }}
       />
-
-      {/* Handle Target */}
       <div
         style={{
           display: "flex",

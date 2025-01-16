@@ -1,11 +1,11 @@
 import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 
-interface ThemesPanelOpenButtonProps {
+interface SettingsPanelOpenButtonProps {
   isOpen: boolean;
   onOpen: () => void;
 }
 
-export function ThemesPanelOpenButton({ onOpen, isOpen = false }: ThemesPanelOpenButtonProps) {
+export function SettingsPanelOpenButton({ onOpen, isOpen = false }: SettingsPanelOpenButtonProps) {
   const runFlow = () => {
     console.log("Running flow...");
     onOpen();
@@ -20,6 +20,6 @@ export function ThemesPanelOpenButton({ onOpen, isOpen = false }: ThemesPanelOpe
     >
       <SettingsSuggestIcon />
     </button>
-    
+
   );
 }

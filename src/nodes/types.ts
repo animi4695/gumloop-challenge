@@ -10,6 +10,7 @@ import SpotifyInputNodeComponent from "../components/SpotifyInputNode";
 import SpotifySearchTrackNodeComponent from "../components/SpotifySearchNode";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
 import SpotifyCreatePlaylistNodeComponent from "../components/SpotifyCreateTrackNode";
+
 export type FunctionNode = Node<
   {
     label: string;
@@ -106,9 +107,26 @@ export type CustomNodeProps = {
 
 export type AppNode =  BuiltInNode | FunctionNode | CustomNode | YoutubeNode | SpotifyInputNode | SpotifySearchTrackNode | SpotifyCreateTrackNode | OutputNode;
 
+export type Status = "RUNNING" | "SUCCESS" | "FAILED";
+
+export type NodeOutput = {
+  id: string;
+  label: string;
+  output: string;
+  status: Status;
+  logs: string[];
+  time: number;
+};
+
 export type AppState = {
   nodes: AppNode[];
   edges: Edge[];
+  nodeOutputs: NodeOutput[];
+  getNodeOutput: (nodeId: string) => NodeOutput | undefined;
+  setNodeOutput: (nodeId: string, nodeOutput: NodeOutput) => void;
+  setNodeOutputStatus: (nodeId: string, status: Status) => void;
+  insertNodeOutputLog: (nodeId: string, log: string) => void;
+  setNodeOutputTime: (nodeId: string, time: number) => void;
   clientId: string,
   redirectUri: string,
   tokenType: string,

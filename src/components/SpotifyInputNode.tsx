@@ -43,16 +43,16 @@ const SpotifyInputNodeComponent: React.FC<NodeProps<SpotifyInputNode>> = ({ id, 
         />
       </div>
       <Handle
-          type="source"
-          position={Position.Bottom}
-          style={{
-            width: "10px",
-            height: "10px",
-            backgroundColor: "#6c757d",
-            borderRadius: "50%",
-            cursor: "pointer",
-          }}
-        />
+        type="source"
+        position={Position.Bottom}
+        style={{
+          width: "10px",
+          height: "10px",
+          backgroundColor: "#6c757d",
+          borderRadius: "50%",
+          cursor: "pointer",
+        }}
+      />
     </div>
 
   );

@@ -41,13 +41,8 @@ const getSpotifyTracks = async (spotifySdk: SpotifyApi, tracks: any) => {
       const response = await spotifySdk.search(query, ['track'], 'US', 1);
 
       if (response?.tracks?.items?.length > 0) {
-        // Get the first matching track from the results
         const spotifyTrack = response.tracks.items[0];
-
-        // Log the matched Spotify track
         console.log('Spotify Track:', spotifyTrack);
-
-        // Add the track details to the result
         result.push({
           title: track.title,
           artist: track.artist,
@@ -67,7 +62,7 @@ const getSpotifyTracks = async (spotifySdk: SpotifyApi, tracks: any) => {
     return result;
   } catch (error) {
     console.error('Failed to fetch Spotify playlist:', error);
-    throw error; // Optionally rethrow the error
+    throw error;
   }
 };
 
@@ -92,6 +87,7 @@ const fetchAndProcessHtml = async (fetchPlayListURL: string) => {
 }
 
 const getTrackDetails = (html: string) => {
+  // TODO - we can modify this to be more robust using AI to extract the details rather than just parsing the HTML
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, "text/html");
 
@@ -101,6 +97,7 @@ const getTrackDetails = (html: string) => {
       "yt-formatted-string[title]"
     );
     return {
+      // this is for non-collobrated playlist (i.e. individual playlist)
       title: formattedStrings[0]?.getAttribute("title") || null, // Main title
       artist: formattedStrings[1]?.getAttribute("title") || null, // Artist
       album: formattedStrings[2]?.getAttribute("title") || null, // Album
@@ -124,15 +121,10 @@ const downloadCSV = (csv: any, filename = "data.csv") => {
 };
 
 const convertToCSV = (data: any) => {
-  // Get headers (keys of the object)
   const headers = Object.keys(data[0]).join(",") + "\n";
-
-  // Convert each object to a comma-separated string
   const rows = data.map((row: any) =>
     Object.values(row).map((value) => `"${value}"`).join(",")
   ).join("\n");
-
-  // Combine headers and rows
   return headers + rows;
 };
 

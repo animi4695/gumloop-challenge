@@ -2,13 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
   Background,
-  addEdge,
-  useNodesState,
-  useEdgesState,
-  type OnConnect,
-  useHandleConnections,
   getIncomers,
-  useNodesData,
 } from "@xyflow/react";
 
 import "@xyflow/react/dist/style.css";
@@ -19,14 +13,10 @@ import { edgeTypes } from "./edges";
 import { RunButton } from "./components/RunButton";
 import { RunReportPanel } from "./components/RunReportPanel";
 import { Logo } from "./components/Logo";
-
-import { buildTreeLayout } from "./layouts/tree";
-import { buildDiagonalLayout, buildHorizontalLayout, buildVerticalLayout } from "./layouts/horizontal";
-import { ThemesPanel } from "./components/ThemesPanel";
-import { ThemesPanelOpenButton } from "./components/ThemesPanelOpenButton";
-import useGumloopStore, { useHtmlStore, usePlaylistStore } from "./store";
+import { SettingsPanel } from "./components/SettingsPanel";
+import { SettingsPanelOpenButton } from "./components/SettingsPanelOpenButton";
+import useGumloopStore, { useHtmlStore } from "./store";
 import { useShallow } from "zustand/shallow";
-import { AccessToken, SpotifyApi } from "@spotify/web-api-ts-sdk";
 import SpotifySdkSingleton from "./spotify";
 
 
@@ -42,13 +32,11 @@ const selector = (state: AppState) => ({
 export default function App() {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useGumloopStore(useShallow(selector));
 
+  const setNodes = useGumloopStore((state) => state.setNodes);
+
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isThemesPanelOpen, setIsThemesPanelOpen] = useState(false);
 
-  const setSpotifyToken = usePlaylistStore((state) => state.updateSpotifyToken);
-
-  const playlistId = usePlaylistStore((state) => state.playlistId);
-  const outputFileName = usePlaylistStore((state) => state.outputFileName);
   const htmlContent = useHtmlStore((state) => state.htmlContent);
 
   // TODO change this to a env variable
@@ -58,17 +46,18 @@ export default function App() {
   const spotifyTokenExpiresIn = useGumloopStore((state) => state.expiresIn);
   const spotifyClientId = useGumloopStore((state) => state.clientId);
 
+  const setNodeOutput = useGumloopStore((state) => state.setNodeOutput);
+  const setNodeOutputStatus = useGumloopStore((state) => state.setNodeOutputStatus);
+  const setNodeOutputTime = useGumloopStore((state) => state.setNodeOutputTime);
+
   const updateSpotifyToken = useGumloopStore((state) => state.updateSpotifyToken);
   const updateSpotifyTokenMetadata = useGumloopStore((state) => state.updateSpotifyTokenMetadata);
 
-
-  // const nodeData = useNodesData('custom-1');
-  // // PLgBV6dl98LOFDeCAT_guiQAzVRhPJfLMi
+  // // sample playlistid PLgBV6dl98LOFDeCAT_guiQAzVRhPJfLMi
 
   useEffect(() => {
     const hash = window.location.hash;
     if (hash) {
-      // Remove the "#" and parse
       const params = new URLSearchParams(hash.substring(1));
       const token = params.get("access_token");
       const tokenType = params.get("token_type") || "Bearer";
@@ -89,30 +78,10 @@ export default function App() {
           });
         }
         console.log("Spotify Access Token:", token);
-        // window.location.hash = "";
+        window.location.hash = "";
       }
     }
   }, []);
-
-  const updateNodesLayout = (id: number) => {
-    console.log('Initial Nodes:', nodes);
-    var updatedNodes = nodes;
-
-    if (id === 1) {
-      updatedNodes = buildTreeLayout(nodes, 300, 100);
-    } else if (id === 2) {
-      updatedNodes = buildHorizontalLayout(nodes, 200);
-    } else if (id === 3) {
-      updatedNodes = buildVerticalLayout(nodes, 200, 100);
-    }
-    else if (id === 4) {
-      updatedNodes = buildDiagonalLayout(nodes, 100, 80);
-    }
-
-    // setNodes(updatedNodes);
-
-    return updatedNodes;
-  };
 
   const runFlow = async () => {
     console.log('Running flow...');
@@ -209,6 +178,9 @@ export default function App() {
             }
             const bearerToken = 'bearerToken' in spotifyIncommer.data ? spotifyIncommer.data.bearerToken : "";
 
+            if (!bearerToken) {
+              throw new Error('No bearer token found');
+            }
             // get incommer of type spotify-search-track-node
             const spotifySearchTrackIncommer = incomers.find((incomer) => incomer.type === 'spotify-search-track-node');
             if (!spotifySearchTrackIncommer) {
@@ -256,24 +228,36 @@ export default function App() {
 
         visited.add(node.id);
 
-        // Execute the current node
-        const result = await executeNode(node.id);
-        console.log('execute result:', result);
+        setNodeOutput(node.id, { id: node.id, label: node.data.label, output: '', status: 'RUNNING', logs: ["Started Running Node"], time: 0 });
 
-        // Find downstream nodes (nodes connected via outgoing edges)
+        const startTime = Date.now();
+
+        try {
+          const result = await executeNode(node.id);
+          console.log('execute result:', result);
+          setNodeOutputStatus(node.id, 'SUCCESS');
+        }
+        catch (error) {
+          console.log(error);
+          setNodeOutputStatus(node.id, 'FAILED');
+          throw error;
+        }
+        finally {
+          const endTime = Date.now();
+          const executionTime = Math.round((endTime - startTime) / 1000 * 100) / 100;
+          setNodeOutputTime(node.id, executionTime);
+        }
+
         const downstreamEdges = edges.filter((edge) => edge.source === node.id);
 
         for (const edge of downstreamEdges) {
           const downstreamNode = nodeMap.get(edge.target);
           if (downstreamNode && !visited.has(downstreamNode.id)) {
-            // Pass the result of this node to the downstream node
-            // downstreamNode.data.input = result;
             nextLevelNodes.push(downstreamNode);
           }
         }
       }
 
-      // Move to the next level
       currentLevelNodes = nextLevelNodes;
     }
 
@@ -303,8 +287,8 @@ export default function App() {
         isOpen={isPanelOpen}
         onClose={() => setIsPanelOpen(false)}
       />
-      <ThemesPanelOpenButton isOpen={isThemesPanelOpen} onOpen={() => setIsThemesPanelOpen(!isThemesPanelOpen)} />
-      <ThemesPanel isOpen={isThemesPanelOpen} onClose={() => setIsThemesPanelOpen(false)} onThemeClick={updateNodesLayout} />
+      <SettingsPanelOpenButton isOpen={isThemesPanelOpen} onOpen={() => setIsThemesPanelOpen(!isThemesPanelOpen)} />
+      <SettingsPanel isOpen={isThemesPanelOpen} onClose={() => setIsThemesPanelOpen(false)} />
     </ReactFlow>
   );
 }

@@ -1,28 +1,25 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, {useState} from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
-import { usePlaylistStore, useHtmlStore } from "../store";
-import { CustomNode, CustomNodeProps } from "../nodes/types";
+import useGumloopStore, { useHtmlStore } from "../store";
+import { CustomNode } from "../nodes/types";
 
 const PlayListInputNode: React.FC<NodeProps<CustomNode>> = ({ id, data }) => {
 
   const [inputType, setInputType] = useState("playlistid");
 
+  const updateCustomNode = useGumloopStore((state) => state.updateCustomNode);
+
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setInputType(event.target.value);
   };
 
-  const setPlaylistId = usePlaylistStore((state) => state.updatePlaylistId);
   const setHtmlContent = useHtmlStore((state) => state.setHtmlContent);
-
-  const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPlaylistId(event.target.value);
-  };
 
   const playListid = data.output.find((output) => output.name === "playlistId")!.value ?? "";
 
-  useEffect(() => {
-    console.log("Updated data:", data);
-  }, [data]);
+  const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    updateCustomNode(id, "playlistId", event.target.value);
+  };
 
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {

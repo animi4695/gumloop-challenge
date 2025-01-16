@@ -1,14 +1,8 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
-import useGumloopStore, { usePlaylistStore, useHtmlStore } from "../store";
-import { CustomNode, CustomNodeProps, YoutubeNode } from "../nodes/types";
+import { YoutubeNode } from "../nodes/types";
 
 const YoutubeNodeComponent: React.FC<NodeProps<YoutubeNode>> = ({ id, data }) => {
-
-  // Gets tracks list from playlist id or html page.
-
-  const updateCustomNode = useGumloopStore((state) => state.updateCustomNode);
-
   return (
     <div
       style={{
@@ -22,19 +16,15 @@ const YoutubeNodeComponent: React.FC<NodeProps<YoutubeNode>> = ({ id, data }) =>
         color: "#333",
       }}
     >
-      {/* Card Header */}
       <div style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "10px" }}>
         {data.label}
       </div>
 
       <hr style={{ border: "none", borderTop: "1px solid #ddd", margin: "10px 0" }} />
-
-      {/* Description */}
       <div style={{ fontSize: "14px", lineHeight: "1.6", marginBottom: "10px" }}>
         {data.description}
       </div>
 
-      {/* Input/Output Details */}
       <div
         style={{
           fontSize: "12px",
@@ -47,8 +37,6 @@ const YoutubeNodeComponent: React.FC<NodeProps<YoutubeNode>> = ({ id, data }) =>
       >
         <strong>Function:</strong> Input: <em>playlistId/html</em>, Output: <em>playlist tracks</em>
       </div>
-
-      {/* Handles */}
       <div
         style={{
           display: "flex",

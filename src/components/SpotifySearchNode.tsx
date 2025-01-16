@@ -1,10 +1,8 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { Handle, NodeProps, Position } from "@xyflow/react";
 import { SpotifySearchTrackNode } from "../nodes/types";
 
 const SpotifySearchTrackNodeComponent: React.FC<NodeProps<SpotifySearchTrackNode>> = ({ id, data }) => {
-
-  // Searches for list of tracks in spotify using track details and bearer token.
 
   return (
     <div
@@ -51,7 +49,7 @@ const SpotifySearchTrackNodeComponent: React.FC<NodeProps<SpotifySearchTrackNode
       >
         <Handle
           type="target"
-          id = "bearerTokenInput"
+          id="bearerTokenInput"
           position={Position.Top}
           style={{
             width: "10px",
@@ -64,7 +62,7 @@ const SpotifySearchTrackNodeComponent: React.FC<NodeProps<SpotifySearchTrackNode
         />
         <Handle
           type="target"
-          id = "tracksInput"
+          id="tracksInput"
           position={Position.Top}
           style={{
             width: "10px",
@@ -92,6 +90,3 @@ const SpotifySearchTrackNodeComponent: React.FC<NodeProps<SpotifySearchTrackNode
 };
 
 export default SpotifySearchTrackNodeComponent;
-
-// input : spotify bearer token, track details (track name, artist name, album name)
-// output : found(Y/N), Spotify Track Id, 

@@ -4,8 +4,7 @@ import { addEdge, applyNodeChanges, applyEdgeChanges, Edge } from '@xyflow/react
  
 import { initialNodes } from './nodes';
 import { initialEdges } from './edges';
-import { AppNode, AppState } from './nodes/types';
-
+import { AppNode, AppState, NodeOutput, Status } from './nodes/types';
 
 const useGumloopStore = create<AppState>((set, get) => ({
   nodes: initialNodes,
@@ -14,6 +13,66 @@ const useGumloopStore = create<AppState>((set, get) => ({
   redirectUri:"http://localhost:5173/callback",
   tokenType: "Bearer",
   expiresIn: 3600,
+  nodeOutputs: [],
+  getNodeOutput: (nodeId: string): NodeOutput | undefined => {
+    return useGumloopStore.getState().nodeOutputs.find((node: NodeOutput) => node.id === nodeId);
+  },
+  // TODO - maybe combine all these functions into one
+  setNodeOutput: (nodeId: string, nodeOutput: NodeOutput) => {
+    // if exits update, else add
+    set((state) => {
+      const existingNodeOutput = state.nodeOutputs.find((node: NodeOutput) => node.id === nodeId);
+      if (existingNodeOutput) {
+        return {
+          ...state,
+          nodeOutputs: state.nodeOutputs.map((node) => {
+            if (node.id === nodeId) {
+              return nodeOutput;
+            }
+            return node;
+          }),
+        };
+      } else {
+        return {
+          ...state,
+          nodeOutputs: [...state.nodeOutputs, nodeOutput],
+        };
+      }
+    });
+  },
+  setNodeOutputStatus : (nodeId: string, status: Status) => {
+    set((state) => ({
+      ...state,
+      nodeOutputs: state.nodeOutputs.map((node) => {
+        if (node.id === nodeId) {
+          return { ...node, status: status };
+        }
+        return node;
+      }),
+    }));
+  },
+  insertNodeOutputLog : (nodeId: string, log: string) => {
+    set((state) => ({
+      ...state,
+      nodeOutputs: state.nodeOutputs.map((node) => {
+        if (node.id === nodeId) {
+          return { ...node, log: [...node.logs, log] };
+        }
+        return node;
+      }),
+    }))
+  },
+  setNodeOutputTime : (nodeId: string, time: number) => {
+    set((state) => ({
+      ...state,
+      nodeOutputs: state.nodeOutputs.map((node) => {
+        if (node.id === nodeId) {
+          return { ...node, time: time };
+        }
+        return node;
+      }),
+    }))
+  },
   onNodesChange: (changes) => {
     set({
       nodes: applyNodeChanges(changes, get().nodes),
@@ -90,41 +149,6 @@ const useGumloopStore = create<AppState>((set, get) => ({
 }));
  
 export default useGumloopStore;
-
-// export const updateCustomNode = (nodeId: string, newOutputValue: any) => {
-//     useGumloopStore.getState().updateNodeData(nodeId, (data) => ({
-//         ...data,
-//         output: data.output.map((output: any) =>
-//             output.name === "playlistId" ? { ...output, value: newOutputValue } : output
-//         ),
-//     }));
-// };
-
-type State = {
-    playlistId: string
-    outputFileName: string
-    spotifyToken: string
-    spotifyPlaylistName: string
-}
-
-type Action = {
-    updatePlaylistId: (playlistId: State['playlistId']) => void
-    updateOutputFileName: (outputFileName: State['outputFileName']) => void
-    updateSpotifyToken: (spotifyToken: State['spotifyToken']) => void
-    updateSpotifyPlaylistName: (spotifyPlaylistName: State['spotifyPlaylistName']) => void
-}
-
-// "PLgBV6dl98LOFDeCAT_guiQAzVRhPJfLMi",
-export const usePlaylistStore = create<State & Action>((set) => ({
-    playlistId: "",
-    outputFileName: "",
-    spotifyToken: "",
-    spotifyPlaylistName: "",
-    updatePlaylistId: (playlistId) => set(() => ({ playlistId: playlistId })),
-    updateOutputFileName: (outputFileName) => set(() => ({ outputFileName: outputFileName })),
-    updateSpotifyToken: (spotifyToken) => set(() => ({ spotifyToken: spotifyToken })),
-    updateSpotifyPlaylistName: (spotifyPlaylistName) => set(() => ({ spotifyPlaylistName: spotifyPlaylistName })),
-}))
 
 
 type HtmlStore = {
