@@ -15,6 +15,8 @@ export function ThemesPanel({ isOpen = true, onClose, onThemeClick }: ThemesPane
     const scopes = [
       'playlist-read-private',
       'playlist-read-collaborative',
+      'playlist-modify-public',
+      'playlist-modify-private',
     ];
 
     const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scopes.join(' '))}`;

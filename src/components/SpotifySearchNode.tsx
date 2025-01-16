@@ -19,19 +19,16 @@ const SpotifySearchTrackNodeComponent: React.FC<NodeProps<SpotifySearchTrackNode
         color: "#333",
       }}
     >
-      {/* Card Header */}
       <div style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "10px" }}>
         {data.label}
       </div>
 
       <hr style={{ border: "none", borderTop: "1px solid #ddd", margin: "10px 0" }} />
 
-      {/* Description */}
       <div style={{ fontSize: "14px", lineHeight: "1.6", marginBottom: "10px" }}>
         {data.description}
       </div>
 
-      {/* Input/Output Details */}
       <div
         style={{
           fontSize: "12px",
@@ -42,10 +39,9 @@ const SpotifySearchTrackNodeComponent: React.FC<NodeProps<SpotifySearchTrackNode
           marginBottom: "15px",
         }}
       >
-        <strong>Function Node:</strong> Input: <em>list of tracks</em>, Output: <em>Found Spotify Tracks</em>
+        <strong>Function Node:</strong> Input: <em>Spotify Token, List of tracks</em>, Output: <em>Found Spotify Tracks</em>
       </div>
 
-      {/* Handles */}
       <div
         style={{
           display: "flex",

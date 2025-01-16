@@ -1,52 +1,111 @@
 import React, { useCallback } from "react";
-import { Handle, Position } from "@xyflow/react";
+import { Handle, NodeProps, Position } from "@xyflow/react";
+import { SpotifyCreateTrackNode } from "../nodes/types";
+import useGumloopStore from "../store";
 
-type CustomNodeProps = {
-  id: string;
-  data: {
-    label: string;
-    onInputChange?: (id: string, value: string) => void;
-    onFileUpload?: (id: string, file: File | null) => void;
+const SpotifyCreatePlaylistNodeComponent: React.FC<NodeProps<SpotifyCreateTrackNode>> = ({ id, data }) => {
+
+  const updateSpotifyPlaylistName = useGumloopStore((state) => state.updateSpotifyPlaylistName);
+
+  const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    updateSpotifyPlaylistName(id, event.target.value);
   };
-};
-
-const SpotifyCreateTrackNode: React.FC<CustomNodeProps> = ({ id, data }) => {
-  const handleInputChange = useCallback(
-    (event: React.ChangeEvent<HTMLInputElement>) => {
-      if (data.onInputChange) {
-        data.onInputChange(id, event.target.value);
-      }
-    },
-    [data, id]
-  );
 
   return (
     <div
       style={{
-        padding: "10px",
-        border: "1px solid #ddd",
-        borderRadius: "4px",
-        backgroundColor: "#f9f9f9",
-        width: "250px",
-        boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2), 0px 2px 4px rgba(0, 0, 0, 0.1)"
+        padding: "20px",
+        border: "1px solid #e0e0e0",
+        borderRadius: "8px",
+        backgroundColor: "#ffffff",
+        width: "320px",
+        boxShadow: "0px 6px 15px rgba(0, 0, 0, 0.15)",
+        fontFamily: "Arial, sans-serif",
+        color: "#333",
       }}
     >
-      <div>{data.label}</div>
-      <hr></hr>
-      <span>This node is a custom node that takes spotify track id, playlist id, found(Y/N) and outputs success(Y/N)</span>
-      <p>
-      input : found(Y/N), Spotify Track Id, PlaylistId
-       output : success(Y/N)
-      </p>
+      <div style={{ fontSize: "18px", fontWeight: "bold", marginBottom: "10px" }}>
+        {data.label}
+      </div>
 
-      <Handle  type="source" position={Position.Bottom} />
-      <Handle style={{ left: '25%'}} id='a' type="target" position={Position.Top} />
-      <Handle style={{ left: '75%'}} id='b' type="target" position={Position.Top} />
+      <hr style={{ border: "none", borderTop: "1px solid #ddd", margin: "10px 0" }} />
+
+      <div style={{ fontSize: "14px", lineHeight: "1.6", marginBottom: "10px" }}>
+        {data.description}
+      </div>
+
+      <div
+        style={{
+          fontSize: "12px",
+          backgroundColor: "#f3f4f6",
+          padding: "10px",
+          borderRadius: "4px",
+          border: "1px solid #ddd",
+          marginBottom: "15px",
+        }}
+      >
+        <strong>Function Node:</strong> Input: <em>Spotify Token, Playlist Name (assuming it doesn't exist already), list of tracks to create</em>, Output: <em>Added List of Spotify Tracks to Playlist</em>
+      </div>
+
+      <div style={{ marginBottom: "10px" }}>
+        <label style={{ fontSize: "14px", fontWeight: "bold", display: "block", marginBottom: "5px" }}>
+          Spotify Playlist Name:
+        </label>
+        <input
+          type="text"
+          placeholder="Enter Playlist Name"
+          value={data.playlistName}
+          onChange={onInputChange}
+          style={{
+            width: "100%",
+            padding: "8px",
+            border: "1px solid #ddd",
+            borderRadius: "4px",
+            fontSize: "14px",
+          }}
+        />
+      </div>
+
+      <Handle
+        type="source"
+        position={Position.Bottom}
+        style={{
+          width: "10px",
+          height: "10px",
+          backgroundColor: "#6c757d",
+          borderRadius: "50%",
+          cursor: "pointer",
+        }}
+      />
+      <Handle
+        style={{
+          width: "10px",
+          height: "10px",
+          backgroundColor: "#6c757d",
+          borderRadius: "50%",
+          cursor: "pointer",
+          left: "25%",
+        }}
+        id="a"
+        type="target"
+        position={Position.Top}
+      />
+      <Handle
+        style={{
+          width: "10px",
+          height: "10px",
+          backgroundColor: "#6c757d",
+          borderRadius: "50%",
+          cursor: "pointer",
+          left: "75%",
+        }}
+        id="b"
+        type="target"
+        position={Position.Top}
+      />
     </div>
+
   );
 };
 
-export default SpotifyCreateTrackNode;
-
-// input : found(Y/N), Spotify Track Id, PlaylistId
-// output : success(Y/N)
+export default SpotifyCreatePlaylistNodeComponent;

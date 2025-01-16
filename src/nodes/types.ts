@@ -9,6 +9,7 @@ import SpotifyInputNode from "../components/SpotifyInputNode";
 import SpotifyInputNodeComponent from "../components/SpotifyInputNode";
 import SpotifySearchTrackNodeComponent from "../components/SpotifySearchNode";
 import { SpotifyApi } from "@spotify/web-api-ts-sdk";
+import SpotifyCreatePlaylistNodeComponent from "../components/SpotifyCreateTrackNode";
 export type FunctionNode = Node<
   {
     label: string;
@@ -52,7 +53,6 @@ export type SpotifyInputNode = Node<
     label: string;
     description: string;
     bearerToken: string;
-    playlistName: string;
   },
   "spotify-input-node"
 >;
@@ -84,7 +84,15 @@ export type SpotifySearchTrackNode = Node<
 export type SpotifyCreateTrackNode = Node<
   {
     label: string;
-    onInputChange?: (id: string, value: string) => void;
+    description: string;
+    playlistName: string;
+    output: [
+      {
+        name: string;
+        value: any;
+      }
+    ],
+    execute: (id: string, sdk: SpotifyApi, playlistName: string, tracks: any) => void;
   },
   "spotify-create-track-node"
 >;
@@ -125,5 +133,5 @@ export const nodeTypes = {
   "spotify-input-node": SpotifyInputNodeComponent,
   "output-node": OutputNode,
   "spotify-search-track-node": SpotifySearchTrackNodeComponent,
-  "spotify-create-track-node": SpotifyCreateTrackNode,
+  "spotify-create-track-node": SpotifyCreatePlaylistNodeComponent,
 } satisfies NodeTypes;
