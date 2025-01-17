@@ -189,7 +189,7 @@ export const initialNodes: AppNode[] = [
     position: { x: 732, y: 86 },
     data: {
       label: "Spotify Access Node",
-      description: "Get playlist details from youtube",
+      description: "Get Spotify Access using this token",
       bearerToken: ""
     }
   },
@@ -241,7 +241,7 @@ export const initialNodes: AppNode[] = [
     position: { x: 812, y: 666 },
     data: {
       label: "Spotify Create Playlist Node",
-      description: "Search for tracks on Spotify",
+      description: "Create a playlist and add tracks on Spotify",
       playlistName: "Gumloop Playlist",
       output: [
         {
