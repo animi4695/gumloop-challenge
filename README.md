@@ -2,6 +2,8 @@
 
 # Gumloop Coding Challenge
 
+[Usage Video](https://www.youtube.com/watch?v=TNoPTbXsahM&t=59s)
+
 👋
 
 This is an open-ended challenge. The general goal is to make the flow do something useful when you click the 'Run Flow' button. It's totally up to you how simple or complex you want to make it.
@@ -29,3 +31,4 @@ npm run dev
 ## Submission
 
 Include a link to your repo in your submission or give https://github.com/rbehal access. Email us at founders@gumloop.com if you have any issues.
+
