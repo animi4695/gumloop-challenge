@@ -1,10 +1,10 @@
 import { create } from 'zustand'
 
-import { addEdge, applyNodeChanges, applyEdgeChanges, Edge } from '@xyflow/react';
+import { addEdge, applyNodeChanges, applyEdgeChanges } from '@xyflow/react';
  
 import { initialNodes } from './nodes';
 import { initialEdges } from './edges';
-import { AppNode, AppState, NodeOutput, Status } from './nodes/types';
+import { AppState, NodeOutput, Status } from './nodes/types';
 
 const useGumloopStore = create<AppState>((set, get) => ({
   nodes: initialNodes,

@@ -1,4 +1,4 @@
-import { codeChallenge, codeVerifier, isTokenExpired, refreshAccessToken } from "../spotify";
+import { base64encode, codeVerifier, isTokenExpired, refreshAccessToken, sha256 } from "../spotify";
 import useGumloopStore from "../store";
 
 interface SettingsPanelProps {
@@ -14,6 +14,9 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
   const handleSpotifyLogin = async () => {
 
     const accessToken = localStorage.getItem("access_token");
+
+    const hashed = await sha256(codeVerifier)
+    const codeChallenge = base64encode(hashed);
 
     if (accessToken != null) {
       if (!isTokenExpired()) {
@@ -48,6 +51,7 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
 
     window.localStorage.setItem('code_verifier', codeVerifier);
     console.log("codeVerifier - first time ", codeVerifier);
+
     const params =  {
       response_type: 'code',
       client_id: clientId,

@@ -34,7 +34,7 @@ const getSpotifyTracks = async (spotifySdk: SpotifyApi, tracks: any) => {
     const result = [];
     
     for (const track of tracks) {
-      const { title, artist, album, time } = track;
+      const { title, artist, album } = track;
 
       // if album is null then search with track and artist. same with artist and track
       let query = "";
@@ -172,7 +172,7 @@ export const initialNodes: AppNode[] = [
           value: [],
         }
       ],
-      execute: async (id : string, inputType : string, input : string) => {
+      execute: async (_id : string, inputType : string, input : string) => {
         try {
           return await fetchAndProcessHtml(inputType, input);
         }
@@ -200,7 +200,7 @@ export const initialNodes: AppNode[] = [
     data: {
       label: "Save Output Node",
       outputFileName: "",
-      execute: (id, outputFileName, value) => {
+      execute: (id, _outputFileName, value) => {
         console.log(`Node ${id} input changed to:`, value);
         const data = convertToCSV(value);
         if(data === '') {
@@ -226,7 +226,7 @@ export const initialNodes: AppNode[] = [
           value: [],
         }
       ],
-      execute: async (id : string, spotifySdk : any, tracks : any) => {
+      execute: async (_id : string, spotifySdk : any, tracks : any) => {
         return await getSpotifyTracks(spotifySdk, tracks).then((data) => {
           console.log('Data:', data);
           // found tracks list
@@ -249,7 +249,7 @@ export const initialNodes: AppNode[] = [
           value: [],
         }
       ],
-      execute: async (id : string, spotifySdk : any, playlistName : string, tracks : any) => {
+      execute: async (_id : string, spotifySdk : any, playlistName : string, tracks : any) => {
         await addTracksToSpotifyPlaylist(spotifySdk, playlistName, tracks);
         return tracks;
       }

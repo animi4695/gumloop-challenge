@@ -3,7 +3,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import React from "react";
 import { NodeOutput } from '../nodes/types';
 
-const OutputComponent: React.FC<NodeOutput> = ({ id, label, output, status, logs, time }) => {
+const OutputComponent: React.FC<NodeOutput> = ({ label, status, logs, time }) => {
   const bgColor = status === "RUNNING" ? "#FFF4E5" : status === "SUCCESS" ? "#E6F7E5" : "#fef2f2";
   const borderColor = status === "RUNNING" ? "#FFA500" : status === "SUCCESS" ? "#28A745" : "#fca5a5";
   const txtColor = status === "RUNNING" ? "#CC8400" : status === "SUCCESS" ? "#19692C" : "#b91c1c";

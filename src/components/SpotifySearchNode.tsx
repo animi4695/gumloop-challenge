@@ -2,7 +2,7 @@ import React from "react";
 import { Handle, NodeProps, Position } from "@xyflow/react";
 import { SpotifySearchTrackNode } from "../nodes/types";
 
-const SpotifySearchTrackNodeComponent: React.FC<NodeProps<SpotifySearchTrackNode>> = ({ id, data }) => {
+const SpotifySearchTrackNodeComponent: React.FC<NodeProps<SpotifySearchTrackNode>> = ({ data }) => {
 
   return (
     <div

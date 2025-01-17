@@ -2,7 +2,7 @@ import React from "react";
 import { Handle, NodeProps, Position } from "@xyflow/react";
 import { SpotifyInputNode } from "../nodes/types";
 
-const SpotifyInputNodeComponent: React.FC<NodeProps<SpotifyInputNode>> = ({ id, data }) => {
+const SpotifyInputNodeComponent: React.FC<NodeProps<SpotifyInputNode>> = ({ data }) => {
 
   const spotifyToken = data.bearerToken;
 

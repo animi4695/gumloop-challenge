@@ -2,7 +2,7 @@ import React from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
 import { YoutubeNode } from "../nodes/types";
 
-const YoutubeNodeComponent: React.FC<NodeProps<YoutubeNode>> = ({ id, data }) => {
+const YoutubeNodeComponent: React.FC<NodeProps<YoutubeNode>> = ({ data }) => {
   return (
     <div
       style={{

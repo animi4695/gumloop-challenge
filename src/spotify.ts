@@ -21,21 +21,18 @@ const generateRandomString = (length: number) => {
 
 export const codeVerifier  = generateRandomString(64);
 
-const sha256 = async (plain: any) => {
+export const sha256 = async (plain: any) => {
   const encoder = new TextEncoder()
   const data = encoder.encode(plain)
   return window.crypto.subtle.digest('SHA-256', data)
 }
 
-const base64encode = (input: any) => {
+export const base64encode = (input: any) => {
   return btoa(String.fromCharCode(...new Uint8Array(input)))
     .replace(/=/g, '')
     .replace(/\+/g, '-')
     .replace(/\//g, '_');
 }
-
-export const hashed = await sha256(codeVerifier)
-export const codeChallenge = base64encode(hashed);
 
 
 export const getToken = async (code: string) => {
