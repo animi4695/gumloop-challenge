@@ -1,12 +1,12 @@
 import React from "react";
-import { Handle, Position } from "@xyflow/react";
+import { Handle, NodeProps, Position } from "@xyflow/react";
 import useGumloopStore from "../store";
-import { CustomNodeProps } from "../nodes/types";
+import { OutputNode } from "../nodes/types";
 
-const OutputNode: React.FC<CustomNodeProps> = ({ id, data }) => {
+const OutputNodeComponent: React.FC<NodeProps<OutputNode>> = ({ id, data }) => {
 
   const updateOutputNodeFileName = useGumloopStore((state) => state.updateOutputNodeFileName);
-
+  const outputDownloadLink = useGumloopStore((state) => state.outputDownloadLink);
   const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     updateOutputNodeFileName(id, event.target.value);
   };
@@ -42,6 +42,29 @@ const OutputNode: React.FC<CustomNodeProps> = ({ id, data }) => {
           marginBottom: "10px",
         }}
       />
+      {outputDownloadLink != "" && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            marginBottom: "10px",
+          }}
+        >
+          <a
+            href={outputDownloadLink}
+            download={data.outputFileName}
+            style={{
+              textDecoration: "none",
+              color: "#007bff",
+              fontSize: "14px",
+              cursor: "pointer",
+            }}
+          >
+            Download CSV File
+          </a>
+        </div>
+      )}
       <div
         style={{
           display: "flex",
@@ -67,4 +90,4 @@ const OutputNode: React.FC<CustomNodeProps> = ({ id, data }) => {
   );
 };
 
-export default OutputNode;
+export default OutputNodeComponent;

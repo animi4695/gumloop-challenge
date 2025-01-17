@@ -1,11 +1,13 @@
 import React, { useState } from "react";
 import { Handle, Position, NodeProps } from "@xyflow/react";
-import useGumloopStore, { useHtmlStore } from "../store";
+import useGumloopStore from "../store";
 import { CustomNode } from "../nodes/types";
 
 const PlayListInputNode: React.FC<NodeProps<CustomNode>> = ({ id, data }) => {
 
-  const [inputType, setInputType] = useState("playlistid");
+  const [inputType, setInputType] = useState("playlistId");
+
+  const inputTypes = ["playlistId", "htmlContent"];
 
   const handleSelectChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     setInputType(event.target.value);
@@ -13,10 +15,9 @@ const PlayListInputNode: React.FC<NodeProps<CustomNode>> = ({ id, data }) => {
 
   const updateCustomNode = useGumloopStore((state) => state.updateCustomNode);
 
-  const setHtmlContent = useHtmlStore((state) => state.setHtmlContent);
-
-  const onInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    updateCustomNode(id, "playlistId", event.target.value);
+  const updateOutput = (outputName: string, value: string) => {
+    updateCustomNode(id, outputName, value);
+    updateCustomNode(id, inputTypes.find((type) => type !== outputName)!, "");
   };
 
   const playListid = data.output.find((output) => output.name === "playlistId")!.value ?? "";
@@ -24,11 +25,12 @@ const PlayListInputNode: React.FC<NodeProps<CustomNode>> = ({ id, data }) => {
   const onFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
       const selectedFile = event.target.files?.[0];
+      console.log('Selected File:', event.target.files);
       if (selectedFile) {
         const reader = new FileReader();
         reader.onload = (e) => {
           const htmlContent = e.target?.result as string;
-          setHtmlContent(htmlContent);
+          updateOutput("htmlContent", htmlContent);
         };
         reader.readAsText(selectedFile);
       }
@@ -75,15 +77,15 @@ const PlayListInputNode: React.FC<NodeProps<CustomNode>> = ({ id, data }) => {
           value={inputType}
           onChange={handleSelectChange}
         >
-          <option value="playlistid">Playlist ID</option>
-          <option value="file">File</option>
+          <option value="playlistId">Playlist ID</option>
+          <option value="htmlContent">File</option>
         </select>
       </div>
-      {inputType === "playlistid" && (
+      {inputType === "playlistId" && (
         <input
           type="text"
           placeholder="Enter Playlist ID"
-          onChange={onInputChange}
+          onChange={(e) => updateOutput("playlistId", e.target.value)}
           value={playListid}
           style={{
             width: "100%",
@@ -95,7 +97,7 @@ const PlayListInputNode: React.FC<NodeProps<CustomNode>> = ({ id, data }) => {
           }}
         />
       )}
-      {inputType === "file" && (
+      {inputType === "htmlContent" && (
         <input
           type="file"
           onChange={onFileChange}

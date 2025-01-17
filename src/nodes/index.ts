@@ -36,8 +36,22 @@ const getSpotifyTracks = async (spotifySdk: SpotifyApi, tracks: any) => {
     for (const track of tracks) {
       const { title, artist, album, time } = track;
 
-      const query = `track:${title} artist:${artist} album:${album}`;
-      
+      // if album is null then search with track and artist. same with artist and track
+      let query = "";
+
+      if (title) {
+        query += `track:${title} `;
+      }
+      if (artist) {
+        query += `artist:${artist} `;
+      }
+      if (album) {
+        query += `album:${album}`;
+      }
+      query = query.trim();
+
+      // const query = `${track ? "track:" + track : ''} ${artist ? "artist:" + artist : ''} ${album ? "album:" + album : ''}`;
+
       const response = await spotifySdk.search(query, ['track'], 'US', 1);
 
       if (response?.tracks?.items?.length > 0) {
@@ -67,20 +81,26 @@ const getSpotifyTracks = async (spotifySdk: SpotifyApi, tracks: any) => {
 };
 
 
-const fetchAndProcessHtml = async (fetchPlayListURL: string) => {
+const fetchAndProcessHtml = async (inputType: string, input: string) => {
   try {
-    console.log('Playlist URL:', fetchPlayListURL);
-    if (!fetchPlayListURL || fetchPlayListURL === '') {
-      console.error('Playlist ID is null or undefined.');
-      return;
-    }
-    const response = await fetch(fetchPlayListURL);
+    if (inputType === "playlistId") {
+      const fetchPlayListURL = import.meta.env.VITE_FETCH_PLAYLIST_URL + input;
+      console.log('Playlist URL:', fetchPlayListURL);
+      if (!fetchPlayListURL || fetchPlayListURL === '') {
+        console.error('Playlist ID is null or undefined.');
+        return;
+      }
+      const response = await fetch(fetchPlayListURL);
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+      }
+      const html = await response.text();
+      return getTrackDetails(html);
     }
-    const html = await response.text();
-    return getTrackDetails(html);
+    else{
+      return getTrackDetails(input);
+    }
   } catch (error) {
     console.error('Failed to fetch HTML:', error);
   }
@@ -141,6 +161,10 @@ export const initialNodes: AppNode[] = [
         {
           name: "playlistId",
           value: "PLgBV6dl98LOFDeCAT_guiQAzVRhPJfLMi",
+        },
+        {
+          name: "htmlContent",
+          value: "",
         }
       ]
     }
@@ -158,12 +182,8 @@ export const initialNodes: AppNode[] = [
           value: [],
         }
       ],
-      execute: async (id : string, playlistId : string) => {
-        return await fetchAndProcessHtml(`http://localhost:3000/api/fetch-html?playlistid=${playlistId}`).then((data) => {
-          console.log('Data:', data);
-          // tracks list
-          return data;
-        });
+      execute: async (id : string, inputType : string, input : string) => {
+        return await fetchAndProcessHtml(inputType, input);
       }
     }
   },
@@ -183,15 +203,17 @@ export const initialNodes: AppNode[] = [
     position: { x: 992, y: 1109 },
     data: {
       label: "Save Output Node",
-      outputFileName: "output.csv",
+      outputFileName: "",
       execute: (id, outputFileName, value) => {
         console.log(`Node ${id} input changed to:`, value);
         const data = convertToCSV(value);
         if(data === '') {
           console.error('No data to save.');
-          return;
+          throw new Error('No data to save.');
         }
-        downloadCSV(data, outputFileName);
+        const blob = new Blob([data], { type: "text/csv;charset=utf-8;" });
+        const url = URL.createObjectURL(blob);
+        return url;
       },
     }
   },

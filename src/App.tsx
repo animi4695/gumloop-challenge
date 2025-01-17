@@ -15,7 +15,7 @@ import { RunReportPanel } from "./components/RunReportPanel";
 import { Logo } from "./components/Logo";
 import { SettingsPanel } from "./components/SettingsPanel";
 import { SettingsPanelOpenButton } from "./components/SettingsPanelOpenButton";
-import useGumloopStore, { useHtmlStore } from "./store";
+import useGumloopStore from "./store";
 import { useShallow } from "zustand/shallow";
 import SpotifySdkSingleton from "./spotify";
 
@@ -32,23 +32,18 @@ const selector = (state: AppState) => ({
 export default function App() {
   const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useGumloopStore(useShallow(selector));
 
-  const setNodes = useGumloopStore((state) => state.setNodes);
-
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isThemesPanelOpen, setIsThemesPanelOpen] = useState(false);
-
-  const htmlContent = useHtmlStore((state) => state.htmlContent);
-
-  // TODO change this to a env variable
-  const fetchPlayListURL = 'http://localhost:3000/api/fetch-html?playlistid=';
 
   const spotifyTokenType = useGumloopStore((state) => state.tokenType);
   const spotifyTokenExpiresIn = useGumloopStore((state) => state.expiresIn);
   const spotifyClientId = useGumloopStore((state) => state.clientId);
 
+  const resetNodeOutputs = useGumloopStore((state) => state.resetNodeOutputs);
   const setNodeOutput = useGumloopStore((state) => state.setNodeOutput);
   const setNodeOutputStatus = useGumloopStore((state) => state.setNodeOutputStatus);
   const setNodeOutputTime = useGumloopStore((state) => state.setNodeOutputTime);
+  const setFinalOutput = useGumloopStore((state) => state.setOutputDownloadLink); 
 
   const updateSpotifyToken = useGumloopStore((state) => state.updateSpotifyToken);
   const updateSpotifyTokenMetadata = useGumloopStore((state) => state.updateSpotifyTokenMetadata);
@@ -86,7 +81,8 @@ export default function App() {
   const runFlow = async () => {
     console.log('Running flow...');
     console.log('nodes:', nodes);
-    console.log('nodes:', edges);
+    console.log('edges:', edges);
+    resetNodeOutputs();
 
     const nodeMap = new Map(nodes.map((node: AppNode) => [node.id, node]));
 
@@ -101,16 +97,31 @@ export default function App() {
 
       console.log(`Executing Node ${nodeId}`);
 
+      // TODO - maybe make the inputs to a node more generic. come back later...
       switch (node.type) {
         case 'youtube-node':
           if ('execute' in node.data) {
             const incomers = getIncomers(node, state.nodes, state.edges);
             console.log('Incomers:', incomers);
-            let data = 'output' in incomers[0].data ? incomers[0].data.output[0].value : null;
+            // we need playlistId or htmlContent. if playlistId is set, use that. if not, use the htmlContent
+            // playlistId and htmlContent are in incommers data.output array with name playlistId and htmlContent and values in value property
+            let tracks: any;
 
-            const tracks = await node.data.execute(node.id, data);
-            console.log('Tracks:', tracks);
-            state.updateCustomNode(node.id, 'tracks', tracks);
+            if ('output' in incomers[0].data && incomers[0].data.output[0].name === 'playlistId' && incomers[0].data.output[0].value != "") {
+              const playlistId = incomers[0].data.output[0].value;
+              tracks = await node.data.execute(node.id, 'playlistId', playlistId);
+              console.log('Tracks from playlistid:', tracks);
+              state.updateCustomNode(node.id, 'tracks', tracks);
+            }
+            else if (incomers[0] && 'output' in incomers[0].data && incomers[0].data.output[1] && incomers[0].data.output[1].name === 'htmlContent' && incomers[0].data.output[1].value) {
+              const htmlContent = incomers[0].data.output[1].value;
+              tracks = await node.data.execute(node.id, 'htmlContent',htmlContent);
+              console.log('Tracks from htmlContent:', tracks);
+              state.updateCustomNode(node.id, 'tracks', tracks);
+            }
+            else {
+              throw new Error('No playlistId or htmlContent found in incomers');
+            }
 
             const updatedNode = useGumloopStore.getState().nodes.find((n) => n.id === node.id);
             console.log('youtube-node Updated Node:', updatedNode);
@@ -124,7 +135,7 @@ export default function App() {
             const incomers = getIncomers(node, state.nodes, state.edges);
             console.log('Incomers:', incomers);
             const data = 'output' in incomers[0].data ? incomers[0].data.output[0].value : null;
-            return await node.data.execute(nodeId, node.data.outputFileName, data);
+            setFinalOutput(await node.data.execute(nodeId, node.data.outputFileName, data));
           }
           break;
         case 'spotify-search-track-node':
@@ -274,6 +285,7 @@ export default function App() {
       edgeTypes={edgeTypes}
       onEdgesChange={onEdgesChange}
       onConnect={onConnect}
+      nodesConnectable={false}
       fitView
     >
       <Background />

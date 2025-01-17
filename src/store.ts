@@ -9,11 +9,18 @@ import { AppNode, AppState, NodeOutput, Status } from './nodes/types';
 const useGumloopStore = create<AppState>((set, get) => ({
   nodes: initialNodes,
   edges: initialEdges,
-  clientId: "d0429ee040f54ec7b068dcf55211712c",
-  redirectUri:"http://localhost:5173/callback",
+  clientId: import.meta.env.VITE_CLIENT_ID as string,
+  redirectUri: import.meta.env.VITE_REDIRECT_URI as string,
   tokenType: "Bearer",
   expiresIn: 3600,
   nodeOutputs: [],
+  outputDownloadLink: "",
+  setOutputDownloadLink : (url : string) => {
+    set({ outputDownloadLink: url });
+  },
+  resetNodeOutputs: () => {
+    set({ nodeOutputs: [] });
+  },
   getNodeOutput: (nodeId: string): NodeOutput | undefined => {
     return useGumloopStore.getState().nodeOutputs.find((node: NodeOutput) => node.id === nodeId);
   },
@@ -149,15 +156,3 @@ const useGumloopStore = create<AppState>((set, get) => ({
 }));
  
 export default useGumloopStore;
-
-
-type HtmlStore = {
-    htmlContent: string;
-    setHtmlContent: (html: string) => void;
-}
-
-export const useHtmlStore = create<HtmlStore>((set) => ({
-    htmlContent: "",
-    setHtmlContent: (html) => set({ htmlContent: html }),
-}));
-  

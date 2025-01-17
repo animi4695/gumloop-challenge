@@ -5,8 +5,8 @@ interface SettingsPanelProps {
 
 export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
   const handleSpotifyLogin = () => {
-    const clientId = 'd0429ee040f54ec7b068dcf55211712c';
-    const redirectUri = 'http://localhost:5173/callback';
+    const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
+    const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
     const scopes = [
       'playlist-read-private',
       'playlist-read-collaborative',

@@ -1,6 +1,6 @@
 import type { Node, Edge, OnNodesChange, OnEdgesChange, OnConnect, BuiltInNode } from "@xyflow/react";
 import PlayListInputNode from "../components/PlayListInputNode";
-import OutputNode from "../components/OutputNode";
+import OutputNode from "../components/OutputNodeComponent";
 import SpotifySearchTrackNode from "../components/SpotifySearchNode";
 import SpotifyCreateTrackNode from "../components/SpotifyCreateTrackNode";
 import type { NodeTypes } from "@xyflow/react";
@@ -28,6 +28,10 @@ export type CustomNode = Node<
       {
         name: string;
         value: any;
+      },
+      {
+        name: string;
+        value: any;
       }
     ]
   },
@@ -44,7 +48,7 @@ export type YoutubeNode = Node<
         value: any;
       }
     ],
-    execute: (id : string, playlistId : string) => void;
+    execute: (id : string, inputType : string, playlistId : string) => void;
   },
   "youtube-node"
 >;
@@ -62,7 +66,7 @@ export type OutputNode = Node<
   {
     label: string;
     outputFileName: string;
-    execute: (id: string, outputFileName: string, value: any) => void;
+    execute: (id: string, outputFileName: string, value: any) => string;
   },
   "output-node"
 >;
@@ -122,6 +126,9 @@ export type AppState = {
   nodes: AppNode[];
   edges: Edge[];
   nodeOutputs: NodeOutput[];
+  resetNodeOutputs: () => void;
+  outputDownloadLink: string;
+  setOutputDownloadLink: (outputDownloadLink: string) => void;
   getNodeOutput: (nodeId: string) => NodeOutput | undefined;
   setNodeOutput: (nodeId: string, nodeOutput: NodeOutput) => void;
   setNodeOutputStatus: (nodeId: string, status: Status) => void;
