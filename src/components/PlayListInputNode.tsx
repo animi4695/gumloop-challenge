@@ -5,7 +5,7 @@ import { CustomNode } from "../nodes/types";
 
 const PlayListInputNode: React.FC<NodeProps<CustomNode>> = ({ id, data }) => {
 
-  const [inputType, setInputType] = useState("playlistId");
+  const [inputType, setInputType] = useState("htmlContent");
 
   const inputTypes = ["playlistId", "htmlContent"];
 

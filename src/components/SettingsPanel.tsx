@@ -1,10 +1,40 @@
+import { codeChallenge, codeVerifier, isTokenExpired, refreshAccessToken } from "../spotify";
+import useGumloopStore from "../store";
+
 interface SettingsPanelProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
-  const handleSpotifyLogin = () => {
+
+  const updateSpotifyToken = useGumloopStore((state) => state.updateSpotifyToken);
+  const updateSpotifyTokenMetadata = useGumloopStore((state) => state.updateSpotifyTokenMetadata);
+
+  const handleSpotifyLogin = async () => {
+
+    const accessToken = localStorage.getItem("access_token");
+
+    if (accessToken != null) {
+      if (!isTokenExpired()) {
+        const expires_in = parseInt(localStorage.getItem('expires_in') || '0');
+        updateSpotifyToken('custom-3', accessToken);
+        updateSpotifyTokenMetadata(accessToken, "Bearer", expires_in);
+        return;
+      }
+      else{
+        console.log("Token is expired or not available. Refreshing...");
+        const response = await refreshAccessToken();
+        if (response) {
+          console.log("after calling refreshAccessToken - ", response);
+          updateSpotifyToken('custom-3', response.access_token);
+          updateSpotifyTokenMetadata(response.access_token, response.token_type, parseInt(response.expires_in));
+          return;
+        }
+      }
+    }
+
+    // fresh login
     const clientId = import.meta.env.VITE_SPOTIFY_CLIENT_ID;
     const redirectUri = import.meta.env.VITE_SPOTIFY_REDIRECT_URI;
     const scopes = [
@@ -13,11 +43,23 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
       'playlist-modify-public',
       'playlist-modify-private',
     ];
+    
+    const authUrl = new URL("https://accounts.spotify.com/authorize")
 
-    const authUrl = `https://accounts.spotify.com/authorize?client_id=${clientId}&response_type=token&redirect_uri=${encodeURIComponent(
-      redirectUri
-    )}&scope=${encodeURIComponent(scopes.join(' '))}`;
-    window.location.href = authUrl;
+    window.localStorage.setItem('code_verifier', codeVerifier);
+    console.log("codeVerifier - first time ", codeVerifier);
+    const params =  {
+      response_type: 'code',
+      client_id: clientId,
+      scope: scopes.join(' '),
+      code_challenge_method: 'S256',
+      code_challenge: codeChallenge,
+      redirect_uri: redirectUri,
+    }
+
+    console.log("codeVerifier - second time ", codeVerifier);
+    authUrl.search = new URLSearchParams(params).toString();
+    window.location.href = authUrl.toString();
   };
 
   return (
@@ -48,7 +90,7 @@ export function SettingsPanel({ isOpen = true, onClose }: SettingsPanelProps) {
               You can now see the token in the Spotify Access node.
             </li>
             <li>
-              Enter a playlist ID or upload a playlist HTML file in the Playlist Input Node.
+              Enter a playlist ID or upload a playlist HTML file in the Playlist Input Node. <strong>(Playlist ID option works only when the API is setup that takes playlist ID and return html)</strong>
             </li>
             <li>
               Enter Playlist name you want to create in the Spotify Create Playlist Node.

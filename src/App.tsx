@@ -17,7 +17,7 @@ import { SettingsPanel } from "./components/SettingsPanel";
 import { SettingsPanelOpenButton } from "./components/SettingsPanelOpenButton";
 import useGumloopStore from "./store";
 import { useShallow } from "zustand/shallow";
-import SpotifySdkSingleton from "./spotify";
+import SpotifySdkSingleton, { getToken } from "./spotify";
 
 
 const selector = (state: AppState) => ({
@@ -48,35 +48,29 @@ export default function App() {
   const updateSpotifyToken = useGumloopStore((state) => state.updateSpotifyToken);
   const updateSpotifyTokenMetadata = useGumloopStore((state) => state.updateSpotifyTokenMetadata);
 
+  const [tokenFetched, setTokenFetched] = useState(false);
   // // sample playlistid PLgBV6dl98LOFDeCAT_guiQAzVRhPJfLMi
 
   useEffect(() => {
-    const hash = window.location.hash;
-    if (hash) {
-      const params = new URLSearchParams(hash.substring(1));
-      const token = params.get("access_token");
-      const tokenType = params.get("token_type") || "Bearer";
-      const expiresIn = params.get("expires_in") || "3600";
-
-      if (token) {
-        updateSpotifyToken('custom-3', token);
-        updateSpotifyTokenMetadata(token, tokenType, parseInt(expiresIn));
-
-        if (token && tokenType && expiresIn) {
-          const sdk = SpotifySdkSingleton.getInstance('', {
-            access_token: token, token_type: tokenType, expires_in: parseInt(expiresIn),
-            refresh_token: ""
-          });
-
-          sdk.currentUser.profile().then((profile) => {
-            console.log("Profile:", profile);
-          });
+    const fetchToken = async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      let code = urlParams.get('code');
+      
+      if (code != "" && code != null && !tokenFetched) {
+        const response = await getToken(code);
+        if (response) {
+          updateSpotifyToken('custom-3', response.access_token);
+          updateSpotifyTokenMetadata(response.access_token, response.token_type, parseInt(response.expires_in));
+          setTokenFetched(true);
         }
-        console.log("Spotify Access Token:", token);
-        window.location.hash = "";
       }
-    }
-  }, []);
+      else {
+        console.log("No code found in URL");
+      }
+    };
+
+    fetchToken();
+  }, [tokenFetched]);
 
   const runFlow = async () => {
     console.log('Running flow...');

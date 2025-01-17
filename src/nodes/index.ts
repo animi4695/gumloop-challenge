@@ -103,6 +103,7 @@ const fetchAndProcessHtml = async (inputType: string, input: string) => {
     }
   } catch (error) {
     console.error('Failed to fetch HTML:', error);
+    throw error;
   }
 }
 
@@ -127,17 +128,6 @@ const getTrackDetails = (html: string) => {
 
   console.log("Extracted Details:", details);
   return details;
-};
-
-const downloadCSV = (csv: any, filename = "data.csv") => {
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const link = document.createElement("a");
-  const url = URL.createObjectURL(blob);
-  link.href = url;
-  link.setAttribute("download", filename);
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
 };
 
 const convertToCSV = (data: any) => {
@@ -183,7 +173,13 @@ export const initialNodes: AppNode[] = [
         }
       ],
       execute: async (id : string, inputType : string, input : string) => {
-        return await fetchAndProcessHtml(inputType, input);
+        try {
+          return await fetchAndProcessHtml(inputType, input);
+        }
+        catch (error) {
+          console.error('Failed to fetch HTML:', error);
+          throw error;
+        }
       }
     }
   },
