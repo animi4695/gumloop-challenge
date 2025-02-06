@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
-import { Analytics } from '@vercel/analytics/next';
+import { Analytics } from '@vercel/analytics/react';
 
 import App from './App';
 
@@ -11,8 +11,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <div style={{ width: '100vw', height: '100vh' }}>
       <ReactFlowProvider>
-        <App />
         <Analytics />
+        <App />
       </ReactFlowProvider>
     </div>
   </React.StrictMode>
